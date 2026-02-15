@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── DARK MODE IS DEFAULT (root = dark) ──────────────────────────── */
+:root {
+  --bg:         224 40% 5%;
+  --bg-card:    224 40% 8%;
+  --bg-muted:   220 30% 12%;
+  --fg:         213 31% 93%;
+  --fg-muted:   213 20% 65%;
+  --border:     220 20% 16%;
+  --accent:     45 96% 54%;     /* gold */
+  --accent-fg:  224 40% 5%;
+  --radius:     0.75rem;
+}
+
+/* LIGHT OVERRIDE */
+.light {
+  --bg:         0 0% 98%;
+  --bg-card:    0 0% 100%;
+  --bg-muted:   210 40% 96%;
+  --fg:         224 40% 8%;
+  --fg-muted:   220 15% 40%;
+  --border:     220 13% 88%;
+  --accent:     45 90% 42%;
+  --accent-fg:  0 0% 100%;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: hsl(var(--bg)); }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+
+/* ─── SELECTION ──────────────────────────────────────────────────── */
+::selection { background: hsl(var(--accent) / 0.3); }
+
+/* ─── UTILITY CLASSES ────────────────────────────────────────────── */
+.card {
+  background: hsl(var(--bg-card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+.gold { color: hsl(var(--accent)); }
+.gold-bg { background: hsl(var(--accent)); color: hsl(var(--accent-fg)); }
+
+.muted { color: hsl(var(--fg-muted)); }
+.font-display { font-family: 'Playfair Display', serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── GRID NOISE TEXTURE ─────────────────────────────────────────── */
+.noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ─── FADE-IN ANIMATIONS ─────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+.delay-100 { animation-delay: 0.1s; opacity: 0; }
+.delay-200 { animation-delay: 0.2s; opacity: 0; }
+.delay-300 { animation-delay: 0.3s; opacity: 0; }
+.delay-400 { animation-delay: 0.4s; opacity: 0; }
+.delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+/* ─── GLOW EFFECT ────────────────────────────────────────────────── */
+.glow-gold { box-shadow: 0 0 20px hsl(var(--accent) / 0.25); }
+.glow-gold:hover { box-shadow: 0 0 32px hsl(var(--accent) / 0.4); }
+
+/* ─── PROSE FOR NOTES ────────────────────────────────────────────── */
+.prose-note {
+  color: hsl(var(--fg));
+  line-height: 1.8;
+}
+.prose-note h1, .prose-note h2, .prose-note h3 {
+  font-family: 'Playfair Display', serif;
+  color: hsl(var(--fg));
+  margin: 1.5em 0 0.5em;
+}
+.prose-note p { margin-bottom: 1em; }
+.prose-note code {
+  font-family: 'JetBrains Mono', monospace;
+  background: hsl(var(--bg-muted));
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+/* ─── TAB ACTIVE STATE ───────────────────────────────────────────── */
+.nav-link { transition: color 0.2s, border-color 0.2s; }
+.nav-link.active { color: hsl(var(--accent)); border-bottom: 2px solid hsl(var(--accent)); }
+
+/* ─── PREVENT THEME FLASH (set by inline script in layout) ──────── */
+html { color-scheme: dark; }
+html.light { color-scheme: light; }
