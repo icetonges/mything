@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 224 40% 5%;
+  --foreground: 213 31% 93%;
+  --card: 224 40% 8%;
+  --card-foreground: 213 31% 93%;
+  --muted: 220 30% 14%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 43 96% 56%;
+  --accent-foreground: 224 40% 5%;
+}
+
+.light {
+  --background: 0 0% 98%;
+  --foreground: 224 40% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 40% 8%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 43 96% 40%;
+  --accent-foreground: 0 0% 100%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-inter), sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

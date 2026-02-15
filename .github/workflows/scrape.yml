@@ -1,0 +1,19 @@
+name: Auto-Scrape Tech News
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install feedparser requests google-generativeai
+      - run: python scripts/scrape_tech_news.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SCRAPER_TOKEN: ${{ secrets.SCRAPER_TOKEN }}
+          SITE_URL: https://mything.vercel.app
