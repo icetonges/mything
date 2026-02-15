@@ -1,42 +1,37 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import nodemailer from 'nodemailer';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import nodemailer from "nodemailer";
 
-const schema = z.object({
-  name: z.string().min(1),
+const Schema = z.object({
+  name: z.string().min(1).max(100),
   email: z.string().email(),
-  subject: z.string().min(1),
-  message: z.string().min(1),
+  subject: z.string().min(1).max(200),
+  message: z.string().min(1).max(5000),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = schema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid fields' }, { status: 400 });
+    const data = Schema.parse(body);
+
+    await prisma.contact.create({ data }).catch(() => {});
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      });
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_TO ?? process.env.EMAIL_USER,
+        subject: `[MyThing Contact] ${data.subject}`,
+        html: `<h2>New message from ${data.name}</h2><p><strong>Email:</strong> ${data.email}</p><p><strong>Subject:</strong> ${data.subject}</p><p><strong>Message:</strong></p><p>${data.message.replace(/\n/g, "<br>")}</p>`,
+      }).catch(() => {});
     }
-    const { name, email, subject, message } = parsed.data;
-    const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
-    const to = process.env.EMAIL_TO ?? user;
-    if (!user || !pass) {
-      return NextResponse.json({ error: 'Email not configured' }, { status: 503 });
-    }
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user, pass },
-    });
-    await transporter.sendMail({
-      from: user,
-      to,
-      replyTo: email,
-      subject: `[MyThing] ${subject}`,
-      text: `From: ${name} <${email}>\n\n${message}`,
-    });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error('Contact API error:', e);
-    return NextResponse.json({ error: 'Failed to send' }, { status: 500 });
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

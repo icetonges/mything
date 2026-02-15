@@ -1,40 +1,28 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-export function ThemeToggle({ className }: { className?: string }) {
-  const [light, setLight] = useState(false);
+export default function ThemeToggle() {
+  const [isLight, setIsLight] = useState(false);
 
   useEffect(() => {
-    setLight(typeof document !== 'undefined' && document.documentElement.classList.contains('light'));
+    setIsLight(document.documentElement.classList.contains('light'));
   }, []);
 
-  function toggle() {
-    const html = document.documentElement;
-    if (html.classList.contains('light')) {
-      html.classList.remove('light');
-      localStorage.setItem('theme', 'dark');
-      setLight(false);
-    } else {
-      html.classList.add('light');
-      localStorage.setItem('theme', 'light');
-      setLight(true);
-    }
-  }
+  const toggle = () => {
+    const next = !isLight;
+    setIsLight(next);
+    document.documentElement.classList.toggle('light', next);
+    try { localStorage.setItem('theme', next ? 'light' : 'dark'); } catch {}
+  };
 
   return (
     <button
-      type="button"
       onClick={toggle}
-      aria-label={light ? 'Switch to dark mode' : 'Switch to light mode'}
-      className={cn(
-        'rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-all',
-        className
-      )}
+      aria-label="Toggle theme"
+      className="p-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg-card))] hover:border-[hsl(var(--accent))] transition-all duration-200 text-[hsl(var(--fg-muted))] hover:text-[hsl(var(--accent))]"
     >
-      {light ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+      {isLight ? <Moon size={16} /> : <Sun size={16} />}
     </button>
   );
 }

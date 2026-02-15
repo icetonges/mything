@@ -1,33 +1,40 @@
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
-import { SessionProvider } from '@/components/providers/SessionProvider';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
-const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
+import { SITE } from '@/lib/constants';
+import { SessionProvider } from 'next-auth/react';
+import { auth } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'MyThing — Peter Shang',
-  description: 'Personal knowledge management, showcase, and AI-powered digital garden',
+  title: { default: SITE.name, template: `%s | ${SITE.name}` },
+  description: SITE.description,
+  metadataBase: new URL(SITE.url),
+  openGraph: {
+    title: SITE.name,
+    description: SITE.description,
+    url: SITE.url,
+    type: 'website',
+  },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var d=document.documentElement,c=d.classList;if(localStorage.getItem('theme')==='light'){c.add('light');}else{c.remove('light');}})();`,
-          }}
-        />
+        {/* Prevent theme flash */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var t = localStorage.getItem('theme');
+              if (t === 'light') document.documentElement.classList.add('light');
+            } catch(e) {}
+          })();
+        `}} />
       </head>
-      <body className="min-h-screen antialiased">
-        <SessionProvider>{children}</SessionProvider>
+      <body>
+        <SessionProvider session={session}>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

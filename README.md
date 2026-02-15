@@ -1,64 +1,75 @@
-# MyThing
+# MyThing — Personal Knowledge Platform
 
-Personal knowledge management, showcase, and AI-powered digital garden for Peter Shang.
+**Live:** https://mything.vercel.app  
+**Author:** Xiaobing (Peter) Shang  
+**Stack:** Next.js 15 · React 19 · TypeScript · PostgreSQL · Gemini 2.5 · NextAuth v5 · Vercel
 
-**Target URL:** [mything.vercel.app](https://mything.vercel.app)
+---
 
-## Stack
+## Quick Start
 
-- **Framework:** Next.js 15 (App Router, Turbopack)
-- **UI:** React 19, Tailwind CSS, Framer Motion, lucide-react
-- **Auth:** NextAuth.js v5 (Auth.js) — Google OAuth + credentials fallback
-- **DB:** Prisma + PostgreSQL (Neon/Vercel Postgres)
-- **AI:** Google Gemini (chat, note summarization)
-- **Deploy:** Vercel
+```bash
+git clone https://github.com/icetonges/mything.git
+cd mything
+npm install
+cp .env.example .env.local   # Fill in all variables
+npm run db:push               # Push Prisma schema to Neon
+npm run dev                   # Start at localhost:3000
+```
 
-## Setup
+## Tech Stack
 
-1. **Clone and install**
-   ```bash
-   cd mything
-   npm install
-   ```
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS |
+| Auth | NextAuth.js v5 — Google OAuth + passphrase fallback |
+| Database | PostgreSQL via Neon (Vercel Postgres) + Prisma ORM |
+| AI | Gemini 2.5 Flash with 4-model fallback chain |
+| Email | Nodemailer → Gmail SMTP |
+| Deployment | Vercel with CI/CD |
+| Scraper | Python 3.12 + feedparser + GitHub Actions |
 
-2. **Environment**
-   - Copy `.env.example` to `.env.local`
-   - Set `NEXTAUTH_SECRET` (e.g. `openssl rand -base64 32`)
-   - Set `NEXTAUTH_URL` (local: `http://localhost:3000`, prod: `https://mything.vercel.app`)
-   - Add Google OAuth credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-   - Set `OWNER_EMAIL` and `OWNER_PASSPHRASE` for credentials fallback
-   - Set `DATABASE_URL` (PostgreSQL)
-   - Set `GEMINI_API_KEY` for AI features
-   - Optional: `EMAIL_*` for contact form, `SCRAPER_TOKEN` for tech scraper
+## Pages
 
-3. **Database**
-   ```bash
-   npx prisma migrate dev
-   npx prisma generate
-   ```
+| Route | Access | Description |
+|-------|--------|-------------|
+| `/` | Public | Home page — highlights, AI agent, contact |
+| `/tech-trends` | Public | Auto-aggregated tech news |
+| `/my-work` | Public | Portfolio showcase |
+| `/ai-ml` | Public | AI/ML knowledge base |
+| `/fed-finance` | Public | Federal financial management |
+| `/notes` | **Private** | Daily thought capture + AI analysis |
+| `/family` | **Private** | Family space + math helper |
+| `/archive` | **Private** | Note inventory + search |
+| `/archive/[slug]` | **Private** | Auto-generated note pages |
 
-4. **Run**
-   ```bash
-   npm run dev
-   ```
+## Adding a New Tab
 
-## Tech news scraper
+Edit `lib/navigation.ts` — add one entry to `NAV_ITEMS`. That's it.
+All navigation menus, footers, and the home page update automatically.
 
-- Script: `scripts/scrape_tech_news.py`
-- Dependencies: `pip install feedparser requests google-generativeai`
-- Env: `GEMINI_API_KEY`, `SCRAPER_TOKEN`, `SITE_URL`
-- GitHub Actions: `.github/workflows/scrape.yml` (cron daily + manual dispatch)
-- Add repo secrets: `GEMINI_API_KEY`, `SCRAPER_TOKEN`
+## Running the Scraper Locally
 
-## Project structure
+```bash
+pip install feedparser requests google-generativeai python-dateutil
+export GEMINI_API_KEY=your_key
+export SCRAPER_TOKEN=your_token
+export SITE_URL=https://mything.vercel.app
+python scripts/scrape_tech_news.py
+```
 
-- `lib/navigation.ts` — single source of truth for all tabs
-- `lib/constants.ts` — LINKS, site metadata
-- `lib/projects.ts` — portfolio projects
-- `app/(public)/` — public pages (Home, Tech Trends, My Work, AI & ML, Fed Finance)
-- `app/(private)/` — auth-required (Notes, Family, Archive)
-- `app/(auth)/login/` — login page
+## Environment Variables
 
-## License
+See `.env.example` for the complete list with instructions.
 
-Private. © Peter Shang.
+## Key Architecture Decisions
+
+- **Single navigation source:** `lib/navigation.ts` drives all menus, auth middleware, and home cards
+- **Dark mode default:** `:root` = dark, `.light` = override (no flash)
+- **Agentic AI:** Gemini function-calling loop with model fallback chain
+- **Owner-only auth:** Only `OWNER_EMAIL` can authenticate — no public signup
+- **Auto-archive:** Each saved note gets a permanent URL at `/archive/[date-headline-slug]`
+
+---
+
+*Built by Peter Shang as an AI Enabler — architecting, validating, and integrating AI-augmented workflows.*

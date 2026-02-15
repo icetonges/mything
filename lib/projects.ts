@@ -1,121 +1,115 @@
-// lib/projects.ts — typed project data for My Work page
+export type ProjectCategory = 'federal-finance' | 'data-science' | 'full-stack' | 'ai-ml';
+
 export interface Project {
   id: string;
   title: string;
   description: string;
-  category: 'federal-finance' | 'data-science' | 'full-stack' | 'ai-ml';
+  category: ProjectCategory;
   tech: string[];
   links: { label: string; url: string }[];
   featured: boolean;
+  year: number;
 }
 
 export const PROJECTS: Project[] = [
   {
-    id: 'budgetmatter',
-    title: 'Budget Matter Portfolio',
-    description: 'Federal budget visualization and financial management tools built with Tableau and Python.',
-    category: 'federal-finance',
-    tech: ['Tableau', 'Python', 'Pandas'],
-    links: [{ label: 'Live', url: 'https://budgetmatter.github.io' }],
-    featured: true,
-  },
-  {
-    id: 'petershang-resume',
-    title: 'Peter Shang Resume Site',
-    description: 'Modern full-stack resume and portfolio with AI chat, dark mode, and contact form.',
+    id: 'modern-resume',
+    title: 'AI-Powered Portfolio (petershang.vercel.app)',
+    description: 'Full-stack portfolio with agentic Gemini 2.5 AI assistant using Google Search grounding, PostgreSQL, Gmail SMTP notifications, and dark/light theme. Built with Next.js 15, React 19, TypeScript.',
     category: 'full-stack',
-    tech: ['Next.js', 'React', 'Tailwind', 'Vercel'],
-    links: [{ label: 'Live', url: 'https://petershang.vercel.app' }, { label: 'GitHub', url: 'https://github.com/icetonges/modern-resume' }],
+    tech: ['Next.js 15', 'React 19', 'TypeScript', 'PostgreSQL', 'Gemini 2.5', 'Prisma', 'Nodemailer'],
+    links: [
+      { label: 'Live Site', url: 'https://petershang.vercel.app' },
+      { label: 'GitHub', url: 'https://github.com/icetonges/modern-resume' },
+    ],
     featured: true,
+    year: 2025,
   },
   {
     id: 'mything',
-    title: 'MyThing Platform',
-    description: 'Personal knowledge management and showcase platform with AI-powered notes and tech trends.',
+    title: 'MyThing — Personal Knowledge Platform (mything.vercel.app)',
+    description: 'Personal digital garden and knowledge management system with private notes, AI summarization, tech trend aggregation, and federal finance knowledge base.',
     category: 'full-stack',
-    tech: ['Next.js 15', 'Prisma', 'PostgreSQL', 'Gemini'],
-    links: [{ label: 'Live', url: 'https://mything.vercel.app' }],
+    tech: ['Next.js 15', 'React 19', 'TypeScript', 'PostgreSQL', 'NextAuth', 'Gemini 2.5'],
+    links: [
+      { label: 'Live Site', url: 'https://mything.vercel.app' },
+      { label: 'GitHub', url: 'https://github.com/icetonges' },
+    ],
     featured: true,
+    year: 2026,
   },
   {
-    id: 'ds670-capstone',
-    title: 'DoD Spending Capstone',
-    description: 'Data science capstone on DoD spending enriched data — analysis and visualizations.',
-    category: 'data-science',
-    tech: ['Python', 'Pandas', 'Jupyter', 'USAspending API'],
-    links: [],
-    featured: true,
-  },
-  {
-    id: 'usa-spending',
-    title: 'USAspending Bulk Download',
-    description: 'Notebooks for USAspending bulk download and contract fetch pipelines.',
+    id: 'budget-matter',
+    title: 'Budget Matter — Federal Budget Analysis Tool',
+    description: 'Interactive visualization and analysis platform for federal budget data, OMB submissions, and DoD financial reporting. Built to demonstrate federal financial management expertise.',
     category: 'federal-finance',
-    tech: ['Python', 'Pandas', 'API'],
-    links: [],
-    featured: false,
+    tech: ['Python', 'Pandas', 'Tableau', 'PostgreSQL', 'D3.js'],
+    links: [
+      { label: 'GitHub Pages', url: 'https://budgetmatter.github.io' },
+      { label: 'GitHub', url: 'https://github.com/icetonges' },
+    ],
+    featured: true,
+    year: 2024,
   },
   {
-    id: 'sentiment-analysis',
-    title: 'Sentiment Analysis (Text Mining)',
-    description: 'Text mining and sentiment analysis with NLP techniques.',
+    id: 'ai-agents-intensive',
+    title: 'Google/Kaggle AI Agents Intensive — Capstone',
+    description: 'Multi-day intensive on agentic AI systems including function calling, tool use, RAG architectures, and agent orchestration. Completed Nov 2025 with Kaggle certification.',
     category: 'ai-ml',
-    tech: ['Python', 'NLP', 'scikit-learn'],
-    links: [],
-    featured: false,
+    tech: ['Python', 'Gemini API', 'LangChain', 'RAG', 'Function Calling'],
+    links: [
+      { label: 'Kaggle Notebooks', url: 'https://www.kaggle.com/icetonges' },
+    ],
+    featured: true,
+    year: 2025,
   },
   {
-    id: 'recommendation-system',
-    title: 'Recommendation System',
-    description: 'Collaborative filtering and recommendation engine implementation.',
-    category: 'ai-ml',
-    tech: ['Python', 'ML'],
-    links: [],
-    featured: false,
-  },
-  {
-    id: 'hierarchical-clustering',
-    title: 'Hierarchical Clustering with Dendrograms',
-    description: 'Clustering analysis with dendrogram visualization.',
+    id: 'ibm-data-science',
+    title: 'IBM Data Science Professional Certificate',
+    description: 'End-to-end data science pipeline including data wrangling, EDA, machine learning, and visualization. Applied to federal financial dataset analysis.',
     category: 'data-science',
-    tech: ['Python', 'scikit-learn'],
-    links: [],
+    tech: ['Python', 'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Jupyter'],
+    links: [
+      { label: 'Kaggle Profile', url: 'https://www.kaggle.com/icetonges' },
+    ],
     featured: false,
+    year: 2024,
   },
   {
-    id: 'market-basket',
-    title: 'Market Basket Analysis',
-    description: 'Association rules and market basket analysis.',
-    category: 'data-science',
-    tech: ['Python', 'Pandas'],
+    id: 'dod-financial-dashboard',
+    title: 'DoD OIG Financial Risk Dashboard',
+    description: 'Internal dashboard for tracking audit findings, financial risk indicators, and corrective action plans across DoD components. GS-15 led development.',
+    category: 'federal-finance',
+    tech: ['Tableau', 'Excel', 'SQL', 'Python'],
     links: [],
     featured: false,
+    year: 2023,
   },
   {
-    id: 'ds630-ml',
-    title: 'DS630 ML Final Project',
-    description: 'Machine learning project with classification and model comparison.',
+    id: 'federal-nlp',
+    title: 'Federal Policy NLP Analyzer',
+    description: 'NLP pipeline to extract key requirements, deadlines, and metrics from OMB circulars and DoD financial management regulations. Uses transformer models.',
     category: 'ai-ml',
-    tech: ['Python', 'scikit-learn', 'Jupyter'],
-    links: [],
+    tech: ['Python', 'HuggingFace', 'spaCy', 'BERT', 'FastAPI'],
+    links: [
+      { label: 'GitHub', url: 'https://github.com/icetonges' },
+    ],
     featured: false,
+    year: 2024,
   },
   {
-    id: 'ds640-knn',
-    title: 'DS640 KNN Assignment',
-    description: 'K-Nearest Neighbors implementation and evaluation.',
-    category: 'ai-ml',
-    tech: ['Python', 'scikit-learn'],
-    links: [],
-    featured: false,
-  },
-  {
-    id: 'pe-iris',
-    title: 'PE Iris Dataset Analysis',
-    description: 'Exploratory data analysis on Iris dataset.',
+    id: 'budget-forecast',
+    title: 'Pentagon Budget Execution Forecasting Model',
+    description: 'ML model predicting end-of-year budget execution rates using historical obligation patterns, continuing resolution data, and congressional action timelines.',
     category: 'data-science',
-    tech: ['Python', 'Pandas', 'Matplotlib'],
-    links: [],
-    featured: false,
+    tech: ['Python', 'XGBoost', 'Prophet', 'Pandas', 'Matplotlib'],
+    links: [
+      { label: 'Kaggle', url: 'https://www.kaggle.com/icetonges' },
+    ],
+    featured: true,
+    year: 2024,
   },
 ];
+
+export const FEATURED_PROJECTS = PROJECTS.filter(p => p.featured);
+export const getProjectsByCategory = (cat: ProjectCategory) => PROJECTS.filter(p => p.category === cat);

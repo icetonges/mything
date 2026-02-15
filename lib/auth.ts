@@ -1,41 +1,23 @@
-// lib/auth.ts — NextAuth v5 (Auth.js) config, Google + credentials
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'icetonges@gmail.com';
-const OWNER_PASSPHRASE = process.env.OWNER_PASSPHRASE ?? '';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-        },
-      },
     }),
     Credentials({
-      name: 'Credentials',
+      name: 'Passphrase',
       credentials: {
-        email: { label: 'Email', type: 'email' },
         passphrase: { label: 'Passphrase', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.passphrase) return null;
-        if (
-          credentials.email === OWNER_EMAIL &&
-          credentials.passphrase === OWNER_PASSPHRASE &&
-          OWNER_PASSPHRASE
-        ) {
-          return {
-            id: 'owner',
-            email: OWNER_EMAIL,
-            name: 'Peter Shang',
-            image: null,
-          };
+        if (credentials?.passphrase === process.env.OWNER_PASSPHRASE) {
+          return { id: 'owner', name: 'Peter Shang', email: OWNER_EMAIL };
         }
         return null;
       },
@@ -43,13 +25,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user }) {
-      if (user?.email === OWNER_EMAIL) return true;
-      return false;
+      // Only allow owner email
+      if (user.email && user.email !== OWNER_EMAIL) return false;
+      return true;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (token) {
         session.user.id = token.sub ?? '';
-        session.user.email = token.email ?? session.user.email;
+        (session.user as { isOwner?: boolean }).isOwner = session.user.email === OWNER_EMAIL;
       }
       return session;
     },
@@ -60,13 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
-  session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
-  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: 'jwt' },
 });
-
-declare module 'next-auth' {
-  interface Session {
-    user: { id?: string; email?: string | null; name?: string | null; image?: string | null };
-  }
-}
