@@ -1,4 +1,3 @@
-"use server";
 import { LINKS } from "@/lib/constants";
 import { Brain, ExternalLink, Code, BookOpen, Zap } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";
