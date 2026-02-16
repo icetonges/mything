@@ -10,7 +10,7 @@ export function HeroSection() {
           Personal Knowledge Hub
         </div>
         <h1 className="font-playfair text-5xl md:text-7xl font-bold text-gradient mb-4 leading-tight">
-          {OWNER.nickname}&apos;s Space
+          Peter&apos;s Space
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground font-playfair italic mb-2">
           {OWNER.name}
