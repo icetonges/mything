@@ -28,3 +28,14 @@ export const CREDENTIALS = [
   { label: 'AI Agents Intensive', full: 'Google/Kaggle AI Agents Intensive (Nov 2025)' },
   { label: 'GS-15', full: 'Pentagon Financial Manager — $338B Portfolio' },
 ];
+
+export const COLOR_MAP: Record<string, string> = {
+  yellow: 'rgba(245,197,24,0.08)',
+  cyan:   'rgba(6,182,212,0.08)',
+  blue:   'rgba(59,130,246,0.08)',
+  purple: 'rgba(168,85,247,0.08)',
+  green:  'rgba(34,197,94,0.08)',
+  orange: 'rgba(249,115,22,0.08)',
+  pink:   'rgba(236,72,153,0.08)',
+  slate:  'rgba(100,116,139,0.08)',
+};
