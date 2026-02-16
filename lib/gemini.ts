@@ -75,7 +75,7 @@ Return exactly this JSON structure:
   }
 }
 
-export const PETER_CONTEXT = `You are Peter Shang's AI assistant on his personal platform "MyThing" (mything.vercel.app).
+export const PETER_CONTEXT = `You are Peter Shang's AI assistant on his personal platform "MyThing" (shangthing.vercel.app).
 
 About Peter Shang:
 - GS-15 Federal Financial Manager at the Pentagon, managing a $338B portfolio

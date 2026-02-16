@@ -27,12 +27,12 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'mything',
-    title: 'MyThing — Personal Knowledge Platform (mything.vercel.app)',
+    title: 'MyThing — Personal Knowledge Platform (shangthing.vercel.app)',
     description: 'Personal digital garden and knowledge management system with private notes, AI summarization, tech trend aggregation, and federal finance knowledge base.',
     category: 'full-stack',
     tech: ['Next.js 15', 'React 19', 'TypeScript', 'PostgreSQL', 'NextAuth', 'Gemini 2.5'],
     links: [
-      { label: 'Live Site', url: 'https://mything.vercel.app' },
+      { label: 'Live Site', url: 'https://shangthing.vercel.app' },
       { label: 'GitHub', url: 'https://github.com/icetonges' },
     ],
     featured: true,

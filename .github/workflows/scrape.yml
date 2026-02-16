@@ -25,4 +25,4 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SCRAPER_TOKEN:  ${{ secrets.SCRAPER_TOKEN }}
-          SITE_URL:       https://mything.vercel.app
+          SITE_URL:       https://shangthing.vercel.app

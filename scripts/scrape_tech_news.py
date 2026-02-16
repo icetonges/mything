@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MyThing Tech News Scraper
-Fetches RSS feeds, generates AI summaries, pushes to mything.vercel.app
+Fetches RSS feeds, generates AI summaries, pushes to shangthing.vercel.app
 
 Usage:
   pip install feedparser requests google-generativeai python-dateutil
@@ -10,7 +10,7 @@ Usage:
 Environment variables:
   GEMINI_API_KEY  — Google AI Studio key
   SCRAPER_TOKEN   — Matches SCRAPER_TOKEN in Vercel env
-  SITE_URL        — e.g. https://mything.vercel.app
+  SITE_URL        — e.g. https://shangthing.vercel.app
 """
 import feedparser
 import requests
@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 SCRAPER_TOKEN  = os.environ.get("SCRAPER_TOKEN", "")
-SITE_URL       = os.environ.get("SITE_URL", "https://mything.vercel.app")
+SITE_URL       = os.environ.get("SITE_URL", "https://shangthing.vercel.app")
 INGEST_URL     = f"{SITE_URL}/api/tech-trends/ingest"
 
 RSS_FEEDS = {

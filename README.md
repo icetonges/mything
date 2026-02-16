@@ -1,6 +1,6 @@
 # MyThing — Personal Knowledge Platform
 
-**Live:** https://mything.vercel.app  
+**Live:** https://shangthing.vercel.app  
 **Author:** Xiaobing (Peter) Shang  
 **Stack:** Next.js 15 · React 19 · TypeScript · PostgreSQL · Gemini 2.5 · NextAuth v5 · Vercel
 
@@ -54,7 +54,7 @@ All navigation menus, footers, and the home page update automatically.
 pip install feedparser requests google-generativeai python-dateutil
 export GEMINI_API_KEY=your_key
 export SCRAPER_TOKEN=your_token
-export SITE_URL=https://mything.vercel.app
+export SITE_URL=https://shangthing.vercel.app
 python scripts/scrape_tech_news.py
 ```
 

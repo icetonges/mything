@@ -94,44 +94,92 @@ git push -u origin main
 
 ---
 
-## 3. Set Up the Database (Neon)
+## 3. Set Up the Database (Neon via Vercel)
 
-MyThing uses **Neon** — a serverless PostgreSQL database with a free tier that integrates directly with Vercel.
+MyThing uses **Neon** — a serverless PostgreSQL database. The recommended approach is
+to create it directly from the Vercel dashboard, which automatically injects all
+connection variables into your project. No manual copying of connection strings needed.
 
-### Step 3.1 — Create a Neon account and database
+---
 
-1. Go to **https://neon.tech** and sign up (use your Google account for speed)
-2. Click **"New Project"**
-3. Fill in:
-   - **Project name:** `mything`
-   - **Database name:** `mything` (or leave default)
-   - **Region:** Choose closest to you (e.g., `us-east-1` for DC area)
-4. Click **"Create Project"**
+### ✅ If you already see these variables in Vercel → you are done with this step
 
-### Step 3.2 — Get your connection strings
+If your Vercel project's **Settings → Environment Variables** already shows these entries,
+Neon is already connected and all database variables are already set:
 
-After creation, Neon shows you a **Connection Details** panel.
+| Variable already present | Maps to |
+|--------------------------|---------|
+| `DATABASE_URL` | Pooled connection — used by Prisma in production |
+| `DATABASE_URL_UNPOOLED` | Direct connection — used by Prisma migrations |
+| `POSTGRES_URL` | Alias — same as DATABASE_URL |
+| `POSTGRES_HOST` | Database host |
+| `POSTGRES_USER` | Database user |
+| `POSTGRES_DATABASE` | Database name |
+| `PGUSER` | Alias for POSTGRES_USER |
+| `NEON_PROJECT_ID` | Your Neon project identifier |
 
-1. Click **"Connection string"** tab
-2. Select **"Prisma"** from the dropdown — this gives you the correct format
-3. You will see two strings:
-   - **Pooled connection** → this is your `DATABASE_URL`
-   - **Direct connection** → this is your `DATABASE_URL_UNPOOLED`
+**You do not need to copy or create any of these manually.** Skip to Step 3.3 to get
+the two values you need for your local `.env.local` file.
 
-Copy both strings. They look like:
+---
+
+### Step 3.1 — Create Neon database from Vercel (if not done yet)
+
+> Skip this step if variables already appear in your Vercel project (see above).
+
+1. Go to your Vercel project dashboard
+2. Click the **"Storage"** tab in the top navigation
+3. Click **"Create Database"**
+4. Select **"Postgres (Neon)"** → click **Continue**
+5. Choose a region close to you (e.g., `us-east-1` for DC area)
+6. Click **"Create"**
+
+Vercel automatically creates the Neon project and injects all the environment variables
+shown above into your project. No Neon account setup or manual credential copying needed.
+
+### Step 3.2 — Verify variables are set
+
+After creation (or if already set):
+
+1. Go to Vercel → your project → **Settings → Environment Variables**
+2. Confirm you see at minimum: `DATABASE_URL` and `DATABASE_URL_UNPOOLED`
+3. Both should show **"All Environments"** — meaning they apply to Production, Preview, and Development
+
+### Step 3.3 — Get values for your local `.env.local`
+
+Your local machine needs these two database variables. Here is how to get them:
+
+**Method A — Copy directly from Vercel (easiest)**
+
+1. Go to Vercel → your project → **Settings → Environment Variables**
+2. Find `DATABASE_URL` → click the **eye icon** to reveal the value → copy it
+3. Find `DATABASE_URL_UNPOOLED` → reveal → copy it
+4. Paste both into your local `.env.local` file (Step 7)
+
+**Method B — Use Vercel CLI to pull all env vars at once**
+
+```bash
+# Install Vercel CLI if you don't have it
+npm install -g vercel
+
+# Link your local project to Vercel
+vercel link
+
+# Pull all environment variables into .env.local automatically
+vercel env pull .env.local
 ```
-postgresql://neondb_owner:AbCdEfGhIjKl@ep-cool-darkness-123456.us-east-1.aws.neon.tech/nything?sslmode=require&pgbouncer=true
-```
 
-> **Save these** — you will paste them into your `.env.local` file in Step 7.
+This pulls every variable from Vercel into your `.env.local` in one command — the
+fastest way to set up your local environment. You still need to add any variables
+that are NOT in Vercel yet (like `NEXTAUTH_SECRET`, `GEMINI_API_KEY`, etc.).
 
-### Step 3.3 — Alternative: Use Vercel Postgres (also Neon, but managed from Vercel)
-
-If you prefer to manage everything from Vercel:
-1. After deploying to Vercel (Step 9), go to your project
-2. Click **Storage** tab → **Create Database** → **Postgres (Neon)**
-3. Vercel will automatically add the `DATABASE_URL` environment variables to your project
-4. You won't need to copy strings manually — Vercel handles it
+> **What the two strings look like** (for reference):
+> ```
+> DATABASE_URL=postgresql://neondb_owner:AbCdEfGh@ep-name-123.us-east-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true
+> DATABASE_URL_UNPOOLED=postgresql://neondb_owner:AbCdEfGh@ep-name-123.us-east-1.aws.neon.tech/neondb?sslmode=require
+> ```
+> The difference: `DATABASE_URL` has `&pgbouncer=true` at the end (connection pooling for serverless).
+> `DATABASE_URL_UNPOOLED` does not — used for direct schema migrations.
 
 ---
 
@@ -146,45 +194,73 @@ This is how you (as owner) log in to access private spaces (Notes, Archive, Fami
 3. Name it: `mything` → Click **Create**
 4. Make sure the new project is selected in the dropdown
 
-### Step 4.2 — Enable the Google+ API
+### Step 4.2 — Enable the required API
 
-1. In the left menu: **APIs & Services → Library**
-2. Search for **"Google+ API"** → click it → click **Enable**
-3. Also search **"Google Identity"** → Enable that too
+> **Note:** Google+ API is deprecated and removed from the console. You do NOT need to
+> enable any APIs manually for basic Google sign-in with NextAuth. The OAuth2 and
+> OpenID Connect scopes (email, profile) are built-in and require no Library setup.
 
-### Step 4.3 — Create OAuth credentials
+**Skip this step entirely** — go directly to Step 4.3 to create credentials.
+
+The only case where you would visit APIs & Services → Library is if you later want to
+access additional Google APIs (Drive, Calendar, etc.) beyond basic login. For MyThing
+sign-in only, nothing needs to be enabled.
+
+### Step 4.3 — Set up the OAuth Consent Screen (Branding)
+
+Google now calls this section **"Google Auth Platform"** or **"OAuth consent screen"**
+depending on your console version.
+
+1. In the left menu go to: **APIs & Services → OAuth consent screen**  
+   *(Some accounts now show this as: **Google Auth Platform → Branding**)*
+2. If asked "How do you want to configure your app?", select **External** → click **Create**
+3. Fill in the form:
+   - **App name:** `MyThing`
+   - **User support email:** `icetonges@gmail.com`
+   - **App logo:** optional — skip for now
+   - **Developer contact email:** `icetonges@gmail.com`
+4. Click **Save and Continue**
+5. On **Scopes** step: click **Save and Continue** (no changes needed — NextAuth handles scopes)
+6. On **Test users** step:
+   - Click **"+ Add Users"**
+   - Add: `icetonges@gmail.com`
+   - Click **Save and Continue**
+7. Click **Back to Dashboard**
+
+> **Publishing status:** Leave the app in **"Testing"** mode — since only your email is
+> in the test users list, only you can log in. This is exactly what you want for a
+> personal private platform. No verification needed.
+
+### Step 4.4 — Create OAuth Client ID credentials
 
 1. In the left menu: **APIs & Services → Credentials**
-2. Click **"+ Create Credentials"** → **"OAuth Client ID"**
-3. If prompted to configure consent screen first:
-   - User Type: **External** → Create
-   - App name: `MyThing`
-   - User support email: `icetonges@gmail.com`
-   - Developer contact email: `icetonges@gmail.com`
-   - Click **Save and Continue** through all steps
-   - On **Test users** step: add `icetonges@gmail.com`
-4. Back at Create OAuth Client ID:
-   - Application type: **Web application**
-   - Name: `MyThing Web`
-   - **Authorized JavaScript origins:**
-     ```
-     http://localhost:3000
-     https://mything.vercel.app
-     ```
-   - **Authorized redirect URIs:**
-     ```
-     http://localhost:3000/api/auth/callback/google
-     https://mything.vercel.app/api/auth/callback/google
-     ```
-5. Click **Create**
+2. Click **"+ Create Credentials"** at the top → select **"OAuth Client ID"**
+3. Fill in:
+   - **Application type:** Web application
+   - **Name:** `MyThing Web`
+4. Under **Authorized JavaScript origins** click **"+ Add URI"** and add both:
+   ```
+   http://localhost:3000
+   https://shangthing.vercel.app
+   ```
+5. Under **Authorized redirect URIs** click **"+ Add URI"** and add both:
+   ```
+   http://localhost:3000/api/auth/callback/google
+   https://shangthing.vercel.app/api/auth/callback/google
+   ```
+6. Click **Create**
 
-### Step 4.4 — Save your credentials
+### Step 4.5 — Save your credentials
 
-A popup shows your credentials:
+> **Important change as of 2025:** Google only shows the Client Secret **once** at
+> creation time. Copy it immediately — you cannot retrieve it again later (you can
+> only create a new one).
+
+A popup appears titled **"OAuth client created"**:
 - **Client ID** → copy this (looks like `123456789-abc.apps.googleusercontent.com`)
 - **Client Secret** → copy this (looks like `GOCSPX-AbCdEfGh`)
 
-> Keep these secret — never commit them to GitHub.
+Save both somewhere secure before clicking OK. They go into your `.env.local` in Step 7.
 
 ---
 
@@ -241,27 +317,55 @@ This allows the contact form to email you whenever someone sends a message.
 
 ### Step 7.1 — Generate a secure NextAuth secret
 
-In your terminal:
-```bash
-openssl rand -base64 32
+> **Windows users:** `openssl` is not installed by default on Windows.
+> Use the Node.js commands below — Node is already on your machine since you have npm.
+
+**On Windows (PowerShell) — use Node.js:**
+```powershell
+# NEXTAUTH_SECRET (base64, 32 bytes)
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# ADMIN_SECRET (hex, 24 bytes) — run this once
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
+
+# SCRAPER_TOKEN (hex, 24 bytes) — run this again for a different value
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
 ```
 
-Copy the output — it looks like: `K8mNpQrStUvWxYzAbCdEfGhIjKlMnOpQrStUv==`
-
-Also generate two more random strings for `ADMIN_SECRET` and `SCRAPER_TOKEN`:
+**On Mac/Linux — use openssl:**
 ```bash
-openssl rand -hex 24   # for ADMIN_SECRET
-openssl rand -hex 24   # for SCRAPER_TOKEN
+openssl rand -base64 32   # NEXTAUTH_SECRET
+openssl rand -hex 24      # ADMIN_SECRET
+openssl rand -hex 24      # SCRAPER_TOKEN
 ```
+
+**Alternative for all platforms — PowerShell built-in (no Node needed):**
+```powershell
+[Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+```
+
+Copy each output and save it — you will paste these into `.env.local` in the next step.
 
 ### Step 7.2 — Create your local `.env.local` file
 
+**Fastest method — Pull from Vercel automatically (recommended):**
+```bash
+cd mything
+npm install -g vercel       # install Vercel CLI if not already installed
+vercel link                  # connect your local folder to the Vercel project
+vercel env pull .env.local   # pulls DATABASE_URL and all Neon vars automatically
+```
+This pre-fills your `.env.local` with all the database variables already in Vercel.
+Then open the file and add the remaining entries that Vercel doesn't hold yet
+(NEXTAUTH_SECRET, Google, Gemini, Email, Admin secrets).
+
+**Manual method — Copy from template:**
 ```bash
 cd mything
 cp .env.example .env.local
 ```
 
-Now open `.env.local` in your editor and fill in every value:
+Open `.env.local` in your editor and fill in every value:
 
 ```env
 # ─── App ──────────────────────────────────────────────────────────────
@@ -389,26 +493,89 @@ git push origin main
 
 ### Step 9.3 — Add environment variables in Vercel
 
-On the import screen, expand **"Environment Variables"** and add each one:
+> **Important:** DATABASE_URL and all Neon/Postgres variables are already in Vercel
+> from when you connected the database (Step 3). You do NOT need to add those again.
+> Only add the variables listed below.
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `NEXTAUTH_SECRET` | Your openssl output | Same as local |
-| `NEXTAUTH_URL` | `https://mything.vercel.app` | **Different from local** |
-| `GOOGLE_CLIENT_ID` | From Step 4.4 | Same as local |
-| `GOOGLE_CLIENT_SECRET` | From Step 4.4 | Same as local |
-| `OWNER_EMAIL` | `icetonges@gmail.com` | Same as local |
-| `OWNER_PASSPHRASE` | Your passphrase | Same as local |
-| `DATABASE_URL` | Pooled Neon connection | Same as local |
-| `DATABASE_URL_UNPOOLED` | Direct Neon connection | Same as local |
-| `GEMINI_API_KEY` | From Step 5.1 | Same as local |
-| `EMAIL_USER` | `icetonges@gmail.com` | Same as local |
-| `EMAIL_PASS` | 16-char app password | Same as local |
-| `EMAIL_TO` | `icetonges@gmail.com` | Same as local |
-| `ADMIN_SECRET` | Your hex string | Same as local |
-| `SCRAPER_TOKEN` | Your hex string | Same as local |
+**Where to find the Environment Variables screen:**
 
-> **Tip:** You can also add variables after deployment via Vercel dashboard → Project → Settings → Environment Variables.
+- If you are on the **Import screen** (before first deploy):
+  Scroll down → click **"Environment Variables"** to expand the section
+
+- If your project is **already deployed**:
+  Vercel Dashboard → click your project → **Settings** tab → **Environment Variables**
+  in the left sidebar → click **"Add Environment Variable"**
+
+---
+
+**How to add each variable (repeat for each one):**
+
+1. Click **"Add"** or **"Add Environment Variable"**
+2. In the **Name** field: type the variable name exactly as shown (all caps)
+3. In the **Value** field: paste your value
+4. Under **Environments**: leave all three checked ✅ Production ✅ Preview ✅ Development
+5. Click **Save**
+
+---
+
+**Variables to add one by one:**
+
+#### Group 1 — Auth (4 variables)
+
+| # | Name | Value | Where to get it |
+|---|------|-------|----------------|
+| 1 | `NEXTAUTH_SECRET` | Long random string | Run in terminal: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| 2 | `NEXTAUTH_URL` | `https://shangthing.vercel.app` | Type this exactly — use YOUR actual Vercel domain |
+| 3 | `GOOGLE_CLIENT_ID` | `123456789-abc.apps.googleusercontent.com` | From Google Cloud Console → Credentials (Step 4.5) |
+| 4 | `GOOGLE_CLIENT_SECRET` | `GOCSPX-AbCdEfGh...` | From Google Cloud Console → Credentials (Step 4.5) |
+
+#### Group 2 — Owner Identity (2 variables)
+
+| # | Name | Value | Notes |
+|---|------|-------|-------|
+| 5 | `OWNER_EMAIL` | `icetonges@gmail.com` | Must match your Google login email exactly |
+| 6 | `OWNER_PASSPHRASE` | Your chosen passphrase | The backup login password you set locally |
+
+#### Group 3 — AI (1 variable)
+
+| # | Name | Value | Where to get it |
+|---|------|-------|----------------|
+| 7 | `GEMINI_API_KEY` | `AIzaSy...` | From https://aistudio.google.com → Get API Key (Step 5.1) |
+
+#### Group 4 — Email / Gmail SMTP (3 variables)
+
+| # | Name | Value | Notes |
+|---|------|-------|-------|
+| 8 | `EMAIL_USER` | `icetonges@gmail.com` | Your Gmail address |
+| 9 | `EMAIL_PASS` | 16-character app password | From Google Account → Security → App Passwords (Step 6.2). No spaces. |
+| 10 | `EMAIL_TO` | `icetonges@gmail.com` | Where contact form submissions are sent |
+
+#### Group 5 — Security tokens (2 variables)
+
+| # | Name | Value | Where to get it |
+|---|------|-------|----------------|
+| 11 | `ADMIN_SECRET` | Random hex string | Run: `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"` |
+| 12 | `SCRAPER_TOKEN` | Different random hex string | Run the same command again for a different value |
+
+---
+
+**✅ Skip these — already set automatically by Vercel Neon integration:**
+
+These are already in your project from Step 3. Do NOT add them again:
+`DATABASE_URL` · `DATABASE_URL_UNPOOLED` · `POSTGRES_URL` · `POSTGRES_HOST` ·
+`POSTGRES_USER` · `POSTGRES_DATABASE` · `PGUSER` · `NEON_PROJECT_ID` ·
+`POSTGRES_URL_NO_SSL` · `POSTGRES_URL_NON_POOLING` · `NEON_AUTH_BASE_URL`
+
+---
+
+**After adding all 12 variables, verify the list looks right:**
+
+Go to **Settings → Environment Variables** and confirm you see entries for all 12 names
+above (in addition to the Neon variables already there). The values will be hidden
+(shown as dots) — that is normal and correct.
+
+> **Tip:** If you need to edit a value after saving, click the **⋯** (three dots) menu
+> on the right side of any variable row → **Edit**.
 
 ### Step 9.4 — Deploy
 
@@ -434,9 +601,9 @@ Route (app)                    Size    First Load JS
 
 By default, your app is at `mything-[random].vercel.app`.
 
-To get `mything.vercel.app` exactly:
+To get `shangthing.vercel.app` exactly:
 1. In Vercel → Project → **Settings → Domains**
-2. Add `mything.vercel.app`
+2. Add `shangthing.vercel.app`
 3. Vercel will confirm availability (this exact subdomain must not be taken)
 
 ### Step 9.6 — Update Google OAuth for production
@@ -444,8 +611,8 @@ To get `mything.vercel.app` exactly:
 Go back to **Google Cloud Console → APIs & Services → Credentials → your OAuth client**.
 
 Confirm these are already added (you should have done this in Step 4.3):
-- Authorized JavaScript origins: `https://mything.vercel.app`
-- Authorized redirect URIs: `https://mything.vercel.app/api/auth/callback/google`
+- Authorized JavaScript origins: `https://shangthing.vercel.app`
+- Authorized redirect URIs: `https://shangthing.vercel.app/api/auth/callback/google`
 
 If not, add them now and click **Save**.
 
@@ -454,7 +621,7 @@ If not, add them now and click **Save**.
 After deployment, visit this URL in your browser to confirm the database is connected:
 
 ```
-https://mything.vercel.app/api/db-setup?secret=YOUR_ADMIN_SECRET
+https://shangthing.vercel.app/api/db-setup?secret=YOUR_ADMIN_SECRET
 ```
 
 Replace `YOUR_ADMIN_SECRET` with the value you set. Expected response:
@@ -471,7 +638,7 @@ If you see an error, check your `DATABASE_URL` in Vercel environment variables.
 Run this checklist on your live production URL:
 
 ```
-□ https://mything.vercel.app loads correctly
+□ https://shangthing.vercel.app loads correctly
 □ Dark mode is default (no flash on load)
 □ All 5 public tabs navigate correctly
 □ Theme toggle works (dark ↔ light)
@@ -501,7 +668,7 @@ pip install feedparser requests google-generativeai python-dateutil
 # Set environment variables (Mac/Linux)
 export GEMINI_API_KEY=your_gemini_key
 export SCRAPER_TOKEN=your_scraper_token
-export SITE_URL=https://mything.vercel.app
+export SITE_URL=https://shangthing.vercel.app
 
 # Run the scraper
 python scripts/scrape_tech_news.py
@@ -511,7 +678,7 @@ On Windows:
 ```cmd
 set GEMINI_API_KEY=your_gemini_key
 set SCRAPER_TOKEN=your_scraper_token
-set SITE_URL=https://mything.vercel.app
+set SITE_URL=https://shangthing.vercel.app
 python scripts/scrape_tech_news.py
 ```
 
@@ -640,7 +807,7 @@ npm run dev
 - Check that `NEXTAUTH_URL` exactly matches your actual URL (no trailing slash)
 - Verify the redirect URI in Google Cloud Console exactly matches (including `http` vs `https`)
 - For local: must be `http://localhost:3000` (not `127.0.0.1`)
-- For production: must be `https://mything.vercel.app`
+- For production: must be `https://shangthing.vercel.app`
 
 ### AI chat returns "temporarily unavailable"
 
@@ -700,8 +867,8 @@ Production:  Vercel dashboard → Settings → Environment Variables
 
 KEY URLS
 ─────────────────────────────────────
-Live site:          https://mything.vercel.app
-DB health check:    https://mything.vercel.app/api/db-setup?secret=YOUR_ADMIN_SECRET
+Live site:          https://shangthing.vercel.app
+DB health check:    https://shangthing.vercel.app/api/db-setup?secret=YOUR_ADMIN_SECRET
 Neon console:       https://console.neon.tech
 Vercel dashboard:   https://vercel.com/dashboard
 Google Cloud:       https://console.cloud.google.com
@@ -718,4 +885,4 @@ New page content:   edit the page tsx file directly
 ---
 
 *MyThing Deployment Guide v1.0*  
-*Xiaobing (Peter) Shang | AI Enabler | mything.vercel.app*
+*Xiaobing (Peter) Shang | AI Enabler | shangthing.vercel.app*

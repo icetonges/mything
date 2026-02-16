@@ -18,7 +18,7 @@ export const OWNER = {
 
 export const SITE = {
   name:        'MyThing',
-  url:         'https://mything.vercel.app',
+  url:         'https://shangthing.vercel.app',
   description: 'Peter Shang\'s personal knowledge platform — professional showcase, AI tools, and digital garden.',
 };
 
