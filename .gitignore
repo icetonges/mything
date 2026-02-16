@@ -29,3 +29,6 @@ next-env.d.ts
 __pycache__/
 *.pyc
 scraped_articles.json
+
+.vercel
+.env*.local
