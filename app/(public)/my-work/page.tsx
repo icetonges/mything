@@ -1,4 +1,4 @@
-import { PROJECTS, FEATURED_PROJECTS, getProjectsByCategory } from "@/lib/projects";
+import { PROJECTS } from "@/lib/projects";
 import { LINKS } from "@/lib/constants";
 import { Briefcase, ExternalLink, Github, Star } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";

@@ -30,9 +30,9 @@ export default function ContactSection() {
         <div className="space-y-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--accent))] mb-2">Get In Touch</p>
-            <h2 className="font-display text-3xl font-bold mb-4">Let's Connect</h2>
+            <h2 className="font-display text-3xl font-bold mb-4">Let&apos;s Connect</h2>
             <p className="text-[hsl(var(--fg-muted))] leading-relaxed">
-              Whether you have questions about federal financial management, AI projects, or want to collaborate — I'd love to hear from you.
+              Whether you have questions about federal financial management, AI projects, or want to collaborate — I&apos;d love to hear from you.
             </p>
           </div>
 
@@ -64,7 +64,7 @@ export default function ContactSection() {
             <div className="flex flex-col items-center justify-center h-full py-10 space-y-3 text-center">
               <CheckCircle size={48} className="text-green-400" />
               <h3 className="font-display text-xl font-bold">Message Sent!</h3>
-              <p className="text-sm text-[hsl(var(--fg-muted))]">Thank you. I'll get back to you soon.</p>
+              <p className="text-sm text-[hsl(var(--fg-muted))]">Thank you. I&apos;ll get back to you soon.</p>
               <button onClick={() => setStatus('idle')} className="text-sm text-[hsl(var(--accent))] hover:underline">Send another</button>
             </div>
           ) : (

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { Archive, Search, Tag, TrendingUp, Calendar } from "lucide-react";
+import { Archive, Search, Tag, Calendar } from "lucide-react";
 import Link from "next/link";
-import { formatDate, formatDateKey } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 

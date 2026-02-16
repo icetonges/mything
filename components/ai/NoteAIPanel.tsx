@@ -1,4 +1,4 @@
-import { Sparkles, Lightbulb, Target, Tag, TrendingUp } from 'lucide-react';
+import { Sparkles, Lightbulb, Target, Tag } from 'lucide-react';
 
 interface NoteAIPanelProps {
   headline?: string;

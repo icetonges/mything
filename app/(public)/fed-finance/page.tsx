@@ -1,4 +1,4 @@
-import { Landmark, ExternalLink, BookOpen, Scale, ArrowRight } from "lucide-react";
+import { Landmark, BookOpen, Scale, ArrowRight } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";
 
 export const revalidate = 86400;

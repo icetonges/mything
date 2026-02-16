@@ -10,7 +10,7 @@ interface NoteCardProps {
 
 const QUICK_EMOJIS: Record<string, string> = { idea: '💡', trend: '📰', goal: '🎯', note: '📝', insight: '⚡' };
 
-export function NoteCard({ id, date, headline, summary, tags, themes, sentiment, slug, quickType }: NoteCardProps) {
+export function NoteCard({ id: _id, date, headline, summary, tags, themes: _themes, sentiment, slug, quickType }: NoteCardProps) {
   return (
     <div className="card-base p-5 hover:border-orange-400/30 transition-all group">
       <div className="flex items-start justify-between gap-3 mb-3">

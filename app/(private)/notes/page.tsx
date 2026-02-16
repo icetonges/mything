@@ -264,7 +264,7 @@ export default function NotesPage() {
               <Sparkles size={40} className="text-[hsl(var(--fg-muted))] mb-4" />
               <h3 className="font-semibold mb-2">AI Analysis Panel</h3>
               <p className="text-sm text-[hsl(var(--fg-muted))] leading-relaxed max-w-xs">
-                Write your thoughts and click "Save & Analyze". Gemini AI will instantly generate a headline, executive summary, key ideas, action items, themes, and sentiment analysis.
+                Write your thoughts and click &quot;Save &amp; Analyze&quot;. Gemini AI will instantly generate a headline, executive summary, key ideas, action items, themes, and sentiment analysis.
               </p>
             </div>
           )}

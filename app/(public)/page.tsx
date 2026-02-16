@@ -65,7 +65,7 @@ export default async function HomePage() {
               </span>
             </div>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-6 animate-in delay-100">
-              <span className="text-[hsl(var(--fg))]">Peter Shang's</span>
+              <span className="text-[hsl(var(--fg))]">Peter Shang&apos;s</span>
               <br />
               <span className="gold">Digital Space</span>
             </h1>

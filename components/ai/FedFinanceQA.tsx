@@ -48,7 +48,7 @@ export default function FedFinanceQA() {
         <Landmark size={18} className="text-green-400" />
         <div>
           <p className="font-semibold text-sm">Federal Finance Q&amp;A</p>
-          <p className="text-[10px] text-[hsl(var(--fg-muted))]">Powered by Gemini 2.5 · Peter's context</p>
+          <p className="text-[10px] text-[hsl(var(--fg-muted))]">Powered by Gemini 2.5 · Peter&apos;s context</p>
         </div>
       </div>
 

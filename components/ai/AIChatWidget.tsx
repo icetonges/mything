@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Loader2, ExternalLink } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Message { role: 'user' | 'assistant'; content: string; }
@@ -69,7 +69,7 @@ export default function AIChatWidget({ page = 'home' }: Props) {
               <Bot size={16} />
             </div>
             <div>
-              <p className="text-sm font-semibold">Peter's AI Agent</p>
+              <p className="text-sm font-semibold">Peter&apos;s AI Agent</p>
               <p className="text-[10px] text-[hsl(var(--fg-muted))]">Powered by Gemini 2.5 · Live Search</p>
             </div>
           </div>
