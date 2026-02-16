@@ -11,7 +11,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 
 function NavIcon({ name, size = 15 }: { name: string; size?: number }) {
-  const Icon = (Icons as Record<string, React.ComponentType<{ size?: number }>>)[name];
+  const Icon = (Icons as unknown as Record<string, React.ComponentType<{ size?: number }>>)[name];
   return Icon ? <Icon size={size} /> : null;
 }
 

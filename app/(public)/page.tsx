@@ -12,7 +12,7 @@ import { ExternalLink, ArrowRight, Github, Award } from 'lucide-react';
 export const revalidate = 3600;
 
 function NavIcon({ name }: { name: string }) {
-  const Icon = (Icons as Record<string, React.ComponentType<{ size?: number; className?: string }>>)[name];
+  const Icon = (Icons as unknown as Record<string, React.ComponentType<{ size?: number; className?: string }>>)[name];
   return Icon ? <Icon size={20} className="text-[hsl(var(--accent))]" /> : null;
 }
 

@@ -5,7 +5,7 @@ import { Lock, ArrowRight } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
 function NavIcon({ name }: { name: string }) {
-  const Icon = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[name];
+  const Icon = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name];
   return Icon ? <Icon className="h-6 w-6" /> : null;
 }
 
