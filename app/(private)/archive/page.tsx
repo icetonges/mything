@@ -3,6 +3,7 @@ import { Archive, Search, Tag, Calendar, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { DeleteNoteButton } from "@/components/notes/DeleteNoteButton";
+import AdminMonitor from "@/components/archive/AdminMonitor";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,11 @@ export default async function ArchivePage({ searchParams }: SearchProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      {/* ── System Monitor ─────────────────────────────── */}
+      <AdminMonitor />
+
+      {/* ── Archive Header ─────────────────────────────── */}
       <div className="mb-8 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center">
