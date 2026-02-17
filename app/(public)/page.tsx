@@ -60,7 +60,7 @@ export default async function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
           {/* Avatar + title row — all centered */}
           <div className="flex flex-col items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-2xl gold-bg flex items-center justify-center text-2xl font-black font-display">P</div>
+            <div className="w-14 h-14 rounded-2xl gold-bg flex items-center justify-center text-4xl font-black font-display">P</div>
             <div>
               <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-2">
                 <span className="text-[hsl(var(--fg))]">Peter Shang&apos;s </span>
