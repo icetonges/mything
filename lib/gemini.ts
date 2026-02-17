@@ -1,6 +1,12 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+/**
+ * lib/gemini.ts
+ * Uses the NEW @google/genai SDK (replaces deprecated @google/generative-ai).
+ * @google/generative-ai reached end-of-life August 2025 and does NOT support
+ * gemini-2.5-flash or any 2.0+ models properly.
+ */
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 const MODEL_CHAIN = [
   'gemini-2.5-flash',
@@ -8,8 +14,8 @@ const MODEL_CHAIN = [
 ];
 
 const SAFETY = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
 ];
@@ -17,15 +23,17 @@ const SAFETY = [
 export async function generateWithFallback(prompt: string, systemPrompt?: string): Promise<string> {
   for (const modelName of MODEL_CHAIN) {
     try {
-      const model = genAI.getGenerativeModel({
+      const response = await ai.models.generateContent({
         model: modelName,
-        safetySettings: SAFETY,
-        ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
+        contents: prompt,
+        config: {
+          safetySettings: SAFETY,
+          ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
+        },
       });
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const text = response.text;
       if (text) {
-        console.log(`[Gemini] Success with model: ${modelName}`);
+        console.log(`[Gemini] Success: ${modelName}`);
         return text;
       }
     } catch (err) {
@@ -38,12 +46,8 @@ export async function generateWithFallback(prompt: string, systemPrompt?: string
 }
 
 export async function processNote(content: string): Promise<{
-  headline: string;
-  summary: string;
-  keyIdeas: string[];
-  actionItems: string[];
-  themes: string[];
-  sentiment: string;
+  headline: string; summary: string; keyIdeas: string[];
+  actionItems: string[]; themes: string[]; sentiment: string;
 }> {
   const prompt = `Analyze this personal note and return ONLY valid JSON (no markdown fences):
 
@@ -64,34 +68,23 @@ Return exactly this JSON structure:
 
   try {
     const raw = await generateWithFallback(prompt);
-    console.log('[processNote] Raw AI response length:', raw.length);
-    
     const cleaned = raw.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(cleaned);
-    
-    // Validate required fields
-    if (!parsed.headline || !parsed.summary) {
-      throw new Error('Missing required AI fields');
-    }
-    
-    console.log('[processNote] AI analysis successful');
+    if (!parsed.headline || !parsed.summary) throw new Error('Missing required AI fields');
     return {
-      headline: parsed.headline,
-      summary: parsed.summary,
-      keyIdeas: Array.isArray(parsed.keyIdeas) ? parsed.keyIdeas : [],
+      headline:    parsed.headline,
+      summary:     parsed.summary,
+      keyIdeas:    Array.isArray(parsed.keyIdeas)    ? parsed.keyIdeas    : [],
       actionItems: Array.isArray(parsed.actionItems) ? parsed.actionItems : [],
-      themes: Array.isArray(parsed.themes) ? parsed.themes : [],
-      sentiment: parsed.sentiment || 'neutral',
+      themes:      Array.isArray(parsed.themes)      ? parsed.themes      : [],
+      sentiment:   parsed.sentiment || 'neutral',
     };
   } catch (err) {
-    console.error('[processNote] AI analysis failed:', err instanceof Error ? err.message : String(err));
+    console.error('[processNote] failed:', err instanceof Error ? err.message : String(err));
     return {
       headline: content.substring(0, 100),
-      summary: '• Note captured successfully\n• AI processing encountered an issue\n• Content saved - you can view it in the archive',
-      keyIdeas: [],
-      actionItems: [],
-      themes: ['uncategorized'],
-      sentiment: 'neutral',
+      summary: '• Note captured successfully\n• AI processing encountered an issue\n• Content saved',
+      keyIdeas: [], actionItems: [], themes: ['uncategorized'], sentiment: 'neutral',
     };
   }
 }
@@ -120,6 +113,4 @@ Online Presence:
 - Kaggle: https://www.kaggle.com/icetonges
 - LinkedIn: https://www.linkedin.com/in/petershang/
 
-You have access to real-time web search. Be helpful, precise, and professional.
-For federal finance questions, provide authoritative, policy-accurate answers.
-For technical questions, give concrete, actionable answers with code when relevant.`;
+Be helpful, precise, and professional. For federal finance questions, provide authoritative answers.`;

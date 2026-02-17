@@ -1,18 +1,15 @@
 /**
  * lib/ai/tools.ts
- * Tools wired to Gemini's NATIVE function-calling API.
+ * Uses new @google/genai SDK.
+ * FunctionDeclaration now uses `parametersJsonSchema` with `Type` enum (not SchemaType).
  */
 import { prisma } from "@/lib/prisma";
-import { SchemaType, type FunctionDeclaration } from "@google/generative-ai";
+import { Type, type FunctionDeclaration } from "@google/genai";
 
-export interface ToolResult {
-  success: boolean;
-  data?:   unknown;
-  error?:  string;
-}
+export interface ToolResult { success: boolean; data?: unknown; error?: string; }
 export type ToolArgs = Record<string, unknown>;
 
-// ── Tool handlers ─────────────────────────────────────────────────────────
+// ── Handlers ──────────────────────────────────────────────────────────────
 async function searchTechArticles(args: ToolArgs): Promise<ToolResult> {
   const query    = args.query    as string | undefined;
   const category = args.category as string | undefined;
@@ -105,7 +102,6 @@ async function getPlatformStats(_args: ToolArgs): Promise<ToolResult> {
   } catch (e) { return { success: false, error: String(e) }; }
 }
 
-// ── Handler registry ──────────────────────────────────────────────────────
 export const TOOL_HANDLERS: Record<string, (args: ToolArgs) => Promise<ToolResult>> = {
   search_tech_articles: searchTechArticles,
   search_dod_news:      searchDodNews,
@@ -114,64 +110,63 @@ export const TOOL_HANDLERS: Record<string, (args: ToolArgs) => Promise<ToolResul
   get_platform_stats:   getPlatformStats,
 };
 
-// ── Typed declarations using FunctionDeclaration directly ─────────────────
-// Explicitly typed as FunctionDeclaration[] — no casting needed in agent.ts
+// ── New SDK: parametersJsonSchema with Type enum (not SchemaType) ──────────
 export const TOOL_DECLARATIONS: FunctionDeclaration[] = [
   {
     name: "search_tech_articles",
     description: "Search the database for tech news articles. Use for AI, cloud, cybersecurity, web dev topics.",
-    parameters: {
-      type: SchemaType.OBJECT,
+    parametersJsonSchema: {
+      type: Type.OBJECT,
       properties: {
-        query:    { type: SchemaType.STRING, description: "Search keyword or topic" },
-        category: { type: SchemaType.STRING, description: "Filter: AI/ML | Cloud | Cybersecurity | Web Dev | Federal Tech" },
-        limit:    { type: SchemaType.NUMBER, description: "Max results (default 5)" },
+        query:    { type: Type.STRING, description: "Search keyword or topic" },
+        category: { type: Type.STRING, description: "Filter: AI/ML | Cloud | Cybersecurity | Web Dev | Federal Tech" },
+        limit:    { type: Type.NUMBER, description: "Max results (default 5)" },
       },
     },
   },
   {
     name: "search_dod_news",
-    description: "Search DoD-specific news: audit findings, budget updates, policy memos, OMB circulars.",
-    parameters: {
-      type: SchemaType.OBJECT,
+    description: "Search DoD-specific news: audit findings, budget updates, policy memos.",
+    parametersJsonSchema: {
+      type: Type.OBJECT,
       properties: {
-        topic: { type: SchemaType.STRING, description: "Search topic e.g. FIAR, A-11, continuing resolution" },
-        type:  { type: SchemaType.STRING, description: "Category: audit | budget | policy | all" },
-        limit: { type: SchemaType.NUMBER, description: "Max results (default 5)" },
+        topic: { type: Type.STRING, description: "Search topic e.g. FIAR, A-11, continuing resolution" },
+        type:  { type: Type.STRING, description: "Category: audit | budget | policy | all" },
+        limit: { type: Type.NUMBER, description: "Max results (default 5)" },
       },
     },
   },
   {
     name: "save_note",
-    description: "Save a note to the database. ALWAYS confirm content with the user before calling this.",
-    parameters: {
-      type: SchemaType.OBJECT,
+    description: "Save a note to the database. ALWAYS confirm content with user before calling.",
+    parametersJsonSchema: {
+      type: Type.OBJECT,
       properties: {
-        content:   { type: SchemaType.STRING, description: "The note content to save" },
-        tags:      { type: SchemaType.ARRAY,  items: { type: SchemaType.STRING }, description: "Optional tags" },
-        mood:      { type: SchemaType.NUMBER, description: "Mood 1-5" },
-        quickType: { type: SchemaType.STRING, description: "Type: note | idea | goal | insight | trend" },
+        content:   { type: Type.STRING, description: "The note content to save" },
+        tags:      { type: Type.ARRAY,  items: { type: Type.STRING }, description: "Optional tags" },
+        mood:      { type: Type.NUMBER, description: "Mood 1-5" },
+        quickType: { type: Type.STRING, description: "Type: note | idea | goal | insight | trend" },
       },
       required: ["content"],
     },
   },
   {
     name: "get_recent_notes",
-    description: "Retrieve Peter's most recent personal notes for reflection or summarization.",
-    parameters: {
-      type: SchemaType.OBJECT,
+    description: "Retrieve Peter's most recent personal notes.",
+    parametersJsonSchema: {
+      type: Type.OBJECT,
       properties: {
-        limit: { type: SchemaType.NUMBER, description: "Number of notes to retrieve (default 5)" },
+        limit: { type: Type.NUMBER, description: "Number of notes (default 5)" },
       },
     },
   },
   {
     name: "get_platform_stats",
     description: "Get live platform stats: total notes, articles, chats, DoD content count.",
-    parameters: {
-      type: SchemaType.OBJECT,
+    parametersJsonSchema: {
+      type: Type.OBJECT,
       properties: {
-        _dummy: { type: SchemaType.STRING, description: "unused" },
+        format: { type: Type.STRING, description: "Optional: brief or detailed" },
       },
     },
   },
