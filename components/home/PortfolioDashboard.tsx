@@ -9,28 +9,29 @@ interface DashboardProps {
 
 const TIMELINE = [
   { year: '2026', title: 'Data Scientist & Full-Stack Dev',   desc: 'Built 2 production apps (6,300+ lines) in 24 hrs — MyThing platform & interactive resume', highlight: true },
-  { year: '2025', title: 'Google AI Agents Intensive',  desc: 'Completed advanced AI agents course — agentic workflows, tool calling, prompt engineering' },
+  { year: '2025', title: 'Google AI Agents Intensive',  desc: 'Completed advanced AI agents course — agentic workflows, MCP and Engineering, agent quality, Vertex AI and A2A' },
   { year: '2025', title: 'Master of Data Science',      desc: "Saint Peter's University — Capstone: Predictive analytics for federal budget forecasting" },
+  { year: '2024', title: 'IBM Data Science',      desc: "Machine Learning (Scikit-Learn), SQL, API Integration, and Statistical Modeling" },
   { year: '2023', title: 'M.S. Cybersecurity',          desc: 'University of Maryland — Federal systems security, risk management, FISMA compliance' },
   { year: '2022', title: 'M.S. Cyber Forensics',        desc: 'UMGC — Digital forensics, incident response, malware analysis' },
-  { year: '2020', title: 'Pentagon GS-15 FM Professional',      desc: 'Managing $338B DoD budget portfolio — strategic planning, execution, audit readiness' },
+  { year: '2020', title: 'OSD  FM Professional',      desc: 'Managing $338B DoD budget portfolio — strategic planning, execution, audit readiness' },
   { year: '2017', title: 'DoD Inspector General',       desc: 'Financial Systems and Budget analyst — Created finance ecosystem, analyzed execution, and identified $50M+ in cost savings' },
   { year: '2010', title: 'U.S. Army Veteran',           desc: 'Served honorably — logistics, operations, leadership' },
 ];
 
 const SKILLS = [
   { category: 'Federal Finance', level: 95, color: 'bg-green-500',  items: ['OMB A-11/A-123', 'PPBE', 'CFO Act', 'DoD FMR', 'FASAB'] },
-  { category: 'Data Science',    level: 90, color: 'bg-blue-500',   items: ['Python', 'Pandas', 'Scikit-learn', 'Tableau', 'SQL'] },
+  { category: 'Data Science',    level: 91, color: 'bg-blue-500',   items: ['Python', 'Pandas', 'Scikit-learn', 'Tableau', 'SQL'] },
   { category: 'Full-Stack Dev',  level: 85, color: 'bg-purple-500', items: ['Next.js 15', 'React 19', 'TypeScript', 'Prisma', 'PostgreSQL'] },
   { category: 'AI / ML',         level: 92, color: 'bg-yellow-500', items: ['Gemini API', 'Prompt Eng.', 'RAG', 'Agentic AI', 'XGBoost'] },
-  { category: 'Cloud & DevOps',  level: 80, color: 'bg-cyan-500',   items: ['Vercel', 'AWS', 'GitHub Actions', 'Docker', 'Neon DB'] },
+  { category: 'Cloud & DevOps',  level: 83, color: 'bg-cyan-500',   items: ['Vercel', 'AWS', 'GitHub Actions', 'Docker', 'Neon DB'] },
 ];
 
 const ACHIEVEMENTS = [
-  { icon: '💰', title: '$338B Portfolio',      desc: 'DoD budget execution, strategic planning & Congressional justifications at the Pentagon' },
+  { icon: '💰', title: '$300B+ Portfolio',      desc: 'DoD budget execution, strategic planning & Congressional justifications at the Pentagon' },
   { icon: '⚡', title: '24-Hour Build Sprint', desc: '2 production full-stack apps · 6,300 lines · AI-powered at zero cost' },
-  { icon: '🎓', title: '5 Advanced Degrees',   desc: 'Data Science · Cyber Forensics · MBA · Accounting' },
-  { icon: '🏅', title: '15+ Yrs Federal',      desc: 'Pentagon · DoD OIG · U.S. Army — mission-critical leadership' },
+  { icon: '🎓', title: '5 Advanced Degrees',   desc: 'Data Science · Cyber Technology · Cyber Forensics · MBA · Accounting' },
+  { icon: '🏅', title: '15+ Yrs Federal',      desc: 'Pentagon · DoD OIG · Overseas · U.S. Army — mission-critical leadership' },
 ];
 
 export default function PortfolioDashboard({ stats, articles }: DashboardProps) {
@@ -46,7 +47,7 @@ export default function PortfolioDashboard({ stats, articles }: DashboardProps) 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard icon={Code}       label="Projects"      value={`${stats.projectCount}+`} color="yellow" />
         <StatCard icon={Brain}      label="Notes Logged"  value={stats.noteCount}           color="blue"   />
-        <StatCard icon={Github}     label="GitHub Repos"  value="32+"                       color="green"  />
+        <StatCard icon={Github}     label="GitHub Repos"  value="29+"                       color="green"  />
         <StatCard icon={TrendingUp} label="Tech Articles" value={stats.articleCount}        color="purple" />
       </div>
 
