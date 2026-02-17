@@ -73,7 +73,7 @@ export default async function HomePage() {
           {/* Role badge */}
           <div className="flex justify-center mb-5">
             <span className="text-xs font-medium text-[hsl(var(--fg-muted))] border border-[hsl(var(--border))] px-4 py-1.5 rounded-full">
-              AI Enabler · Federal Financial Manager · Data Scientist · GS-15
+              Digital Transformer · Federal Financial Manager · Data Scientist · Agentic AI Developer 
             </span>
           </div>
 
