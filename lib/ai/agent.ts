@@ -95,11 +95,10 @@ export async function runAgent(
         history,
       });
 
-      let currentContents: string | { functionResponse: { id?: string; name: string; response: { output?: string; error?: string } } }[] = userMessage;
+      // First message is just text string
+      let response = await chat.sendMessage({ message: userMessage });
 
       for (let i = 0; i < config.maxIterations; i++) {
-        const response = await chat.sendMessage(currentContents);
-
         const functionCalls = response.functionCalls ?? [];
 
         if (functionCalls.length > 0) {
@@ -135,7 +134,8 @@ export async function runAgent(
             })
           );
 
-          currentContents = functionResponseParts;
+          // Send function responses back
+          response = await chat.sendMessage({ message: functionResponseParts });
 
         } else {
           const answer = (response.text ?? "").trim();
