@@ -4,7 +4,7 @@ import { Zap, ExternalLink, RefreshCw } from 'lucide-react';
 import AIChatWidget from '@/components/ai/AIChatWidget';
 
 export const revalidate = 1800;
-const CATEGORIES = ['All', 'AI/ML', 'Cloud', 'Cybersecurity', 'Web Dev', 'Federal Tech'];
+const CATEGORIES = ['All', 'AI/ML', 'Cloud', 'Cybersecurity', 'Web Dev', 'Federal Tech', 'DoD Audit', 'DoD Budget', 'DoD Policy'];
 
 type SearchParams = { category?: string };
 
@@ -24,11 +24,17 @@ export default async function TechTrendsPage({ searchParams }: { searchParams: P
   } catch {}
 
   const FEEDS = [
-    { name:'Hacker News', url:'https://news.ycombinator.com', cat:'Web Dev' },
-    { name:'ArXiv CS.AI', url:'https://arxiv.org/list/cs.AI/recent', cat:'AI/ML' },
-    { name:'TechCrunch AI', url:'https://techcrunch.com/category/artificial-intelligence/', cat:'AI/ML' },
-    { name:'FedScoop', url:'https://fedscoop.com', cat:'Federal Tech' },
-    { name:'Krebs Security', url:'https://krebsonsecurity.com', cat:'Cybersecurity' },
+    { name:'Hacker News',         url:'https://news.ycombinator.com',                          cat:'Web Dev' },
+    { name:'ArXiv CS.AI',         url:'https://arxiv.org/list/cs.AI/recent',                   cat:'AI/ML' },
+    { name:'FedScoop',            url:'https://fedscoop.com',                                   cat:'Federal Tech' },
+    { name:'Defense News',        url:'https://www.defensenews.com',                            cat:'Federal Tech' },
+    { name:'Krebs Security',      url:'https://krebsonsecurity.com',                            cat:'Cybersecurity' },
+    { name:'DoD OIG',             url:'https://www.dodig.mil/reports-and-publications/',        cat:'DoD Audit' },
+    { name:'GAO Reports',         url:'https://www.gao.gov/reports-testimonies',                cat:'DoD Audit' },
+    { name:'DoD Comptroller',     url:'https://comptroller.defense.gov',                        cat:'DoD Budget' },
+    { name:'Federal News Network',url:'https://federalnewsnetwork.com/budget-and-finance/',     cat:'DoD Budget' },
+    { name:'Breaking Defense',    url:'https://breakingdefense.com',                            cat:'DoD Policy' },
+    { name:'Defense.gov News',    url:'https://www.defense.gov/News/',                          cat:'DoD Policy' },
   ];
 
   return (

@@ -8,7 +8,8 @@ const ArticleSchema = z.object({
   source: z.string(),
   category: z.string(),
   summary: z.string(),
-  publishedAt: z.string().datetime(),
+  // Accept both "Z" and "+00:00" timezone formats from Python's isoformat()
+  publishedAt: z.string().datetime({ offset: true }),
 });
 
 const BodySchema = z.object({
@@ -19,13 +20,17 @@ const BodySchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log("[Ingest] Received", body?.articles?.length ?? 0, "articles");
+
     const { articles, token } = BodySchema.parse(body);
 
     if (token !== process.env.SCRAPER_TOKEN) {
+      console.error("[Ingest] Invalid token");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     let created = 0;
+    let skipped = 0;
     for (const a of articles) {
       try {
         await prisma.techArticle.upsert({
@@ -34,11 +39,16 @@ export async function POST(req: NextRequest) {
           create: { ...a, publishedAt: new Date(a.publishedAt) },
         });
         created++;
-      } catch {}
+      } catch (err) {
+        console.error("[Ingest] Failed article:", a.url, err);
+        skipped++;
+      }
     }
 
-    return NextResponse.json({ success: true, created });
-  } catch {
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    console.log(`[Ingest] Done — created/updated: ${created}, skipped: ${skipped}`);
+    return NextResponse.json({ success: true, created, skipped });
+  } catch (err) {
+    console.error("[Ingest] Parse error:", err);
+    return NextResponse.json({ error: "Failed", detail: String(err) }, { status: 500 });
   }
 }
