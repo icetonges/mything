@@ -16,6 +16,7 @@ import {
   HarmCategory,
   HarmBlockThreshold,
   type FunctionCall,
+  type Part,
 } from "@google/generative-ai";
 import { TOOL_DECLARATIONS, TOOL_HANDLERS } from "./tools";
 import { PETER_CONTEXT } from "@/lib/gemini";
@@ -29,8 +30,8 @@ const SAFETY = [
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
 ];
 
-// Model chain — tries each in order until one succeeds
-const MODEL_CHAIN = ["gemini-2.0-flash", "gemini-1.5-flash"];
+// Model chain — stable, current models only. Both support function calling.
+const MODEL_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
 // ── Exported interfaces (used by chat route + widget) ─────────────────────
 export interface AgentStep {
@@ -137,6 +138,13 @@ export async function runAgent(
   const config = AGENTS[agentId] ?? AGENTS.portfolio;
   const steps: AgentStep[] = [];
 
+  // Guard: API key must be present
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("[Agent] GEMINI_API_KEY is not set in environment");
+    const msg = "GEMINI_API_KEY is not configured. Please add it in Vercel → Settings → Environment Variables, then redeploy.";
+    return { steps: [{ type: "answer", content: msg }], answer: msg, agentId: config.id, agentName: config.name, agentEmoji: config.emoji };
+  }
+
   // Try each model in the chain
   for (const modelName of MODEL_CHAIN) {
     try {
@@ -159,7 +167,8 @@ export async function runAgent(
       const chat = model.startChat({ history });
 
       // ── Agentic loop ────────────────────────────────────────────────
-      let currentMessage = userMessage;
+      // sendMessage accepts string (first turn) or Part[] (function responses)
+      let currentMessage: string | Part[] = userMessage;
 
       for (let i = 0; i < config.maxIterations; i++) {
         const result   = await chat.sendMessage(currentMessage);
@@ -169,8 +178,8 @@ export async function runAgent(
         const functionCalls: FunctionCall[] = response.functionCalls() ?? [];
 
         if (functionCalls.length > 0) {
-          // Record each tool call as a step
-          const functionResponses = await Promise.all(
+          // Execute each tool and collect results
+          const functionResponseParts: Part[] = await Promise.all(
             functionCalls.map(async (fc) => {
               steps.push({
                 type:    "tool_call",
@@ -179,7 +188,6 @@ export async function runAgent(
                 data:    fc.args,
               });
 
-              // Execute the tool
               const handler = TOOL_HANDLERS[fc.name];
               const toolResult = handler
                 ? await handler(fc.args as Record<string, unknown>)
@@ -192,20 +200,20 @@ export async function runAgent(
                 data:    toolResult.data,
               });
 
-              // Return in Gemini's required functionResponse format
+              // Correct Part format for function responses
               return {
                 functionResponse: {
                   name:     fc.name,
                   response: toolResult.success
-                    ? { content: toolResult.data }
-                    : { error: toolResult.error },
+                    ? { content: JSON.stringify(toolResult.data) }
+                    : { error: toolResult.error ?? "Tool failed" },
                 },
-              };
+              } as Part;
             })
           );
 
-          // Feed tool results back — next iteration gets the final answer
-          currentMessage = functionResponses as unknown as string;
+          // Pass Part[] back — this is what sendMessage expects for function responses
+          currentMessage = functionResponseParts;
 
         } else {
           // No function call — this IS the final answer
@@ -221,7 +229,7 @@ export async function runAgent(
         }
       }
 
-      // Exceeded iterations — ask for final answer without tools
+      // Exceeded iterations — get final answer
       const fallbackResult = await chat.sendMessage(
         "Please provide your final answer now based on the information gathered."
       );
@@ -236,10 +244,12 @@ export async function runAgent(
     }
   }
 
-  // All models failed
+  // All models failed — log the key presence for debugging
+  console.error("[Agent] All models failed. Key present:", !!process.env.GEMINI_API_KEY);
+  const errMsg = "Gemini API is not responding. Check that GEMINI_API_KEY is valid in Vercel environment variables.";
   return {
-    steps:      [{ type: "answer", content: "AI temporarily unavailable. Please try again." }],
-    answer:     "AI temporarily unavailable. Please try again.",
+    steps:      [{ type: "answer", content: errMsg }],
+    answer:     errMsg,
     agentId:    config.id,
     agentName:  config.name,
     agentEmoji: config.emoji,

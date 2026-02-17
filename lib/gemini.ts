@@ -3,10 +3,8 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const MODEL_CHAIN = [
-  'gemini-2.5-flash-preview-05-20',
-  'gemini-2.0-flash-exp',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
 ];
 
 const SAFETY = [
@@ -35,7 +33,7 @@ export async function generateWithFallback(prompt: string, systemPrompt?: string
       continue;
     }
   }
-  console.error('[Gemini] All models failed, returning fallback');
+  console.error('[Gemini] All models failed');
   return 'AI processing temporarily unavailable. Please try again.';
 }
 
