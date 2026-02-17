@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { formatDateShort } from '@/lib/utils';
 import { Zap, ExternalLink, RefreshCw } from 'lucide-react';
 import AIChatWidget from '@/components/ai/AIChatWidget';
+import TechPulseSummary from '@/components/home/TechPulseSummary';
 
 export const revalidate = 1800;
 const CATEGORIES = ['All', 'AI/ML', 'Cloud', 'Cybersecurity', 'Web Dev', 'Federal Tech', 'DoD Audit', 'DoD Budget', 'DoD Policy'];
@@ -51,6 +52,9 @@ export default async function TechTrendsPage({ searchParams }: { searchParams: P
         </div>
         <p className="text-[hsl(var(--fg-muted))] max-w-2xl">AI-aggregated emerging technology news from top sources. Updated daily via automated Python scraper + GitHub Actions.</p>
       </div>
+
+      {/* ── AI Summary — inserted above existing tabs, nothing below changed ── */}
+      <TechPulseSummary />
 
       <div className="flex flex-wrap gap-2 mb-8">
         {CATEGORIES.map(c => (

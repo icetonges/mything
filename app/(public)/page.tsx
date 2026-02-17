@@ -7,6 +7,7 @@ import { formatDateShort } from '@/lib/utils';
 import AIChatWidget from '@/components/ai/AIChatWidget';
 import ContactSection from '@/components/home/ContactSection';
 import PortfolioDashboard from '@/components/home/PortfolioDashboard';
+import TechPulsePanel from '@/components/home/TechPulsePanel';
 import * as Icons from 'lucide-react';
 import { ExternalLink, ArrowRight, Github, Award } from 'lucide-react';
 
@@ -40,7 +41,7 @@ async function getStats() {
 
 async function getLatestArticles() {
   try {
-    return await prisma.techArticle.findMany({ take: 3, orderBy: { publishedAt: 'desc' } });
+    return await prisma.techArticle.findMany({ take: 30, orderBy: { publishedAt: 'desc' } });
   } catch { return []; }
 }
 
@@ -60,7 +61,7 @@ export default async function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
           {/* Avatar + title row — all centered */}
           <div className="flex flex-col items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-2xl gold-bg flex items-center justify-center text-5xl font-black font-display">P</div>
+            <div className="w-14 h-14 rounded-2xl gold-bg flex items-center justify-center text-2xl font-black font-display">P</div>
             <div>
               <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-2">
                 <span className="text-[hsl(var(--fg))]">Peter Shang&apos;s </span>
@@ -73,7 +74,7 @@ export default async function HomePage() {
           {/* Role badge */}
           <div className="flex justify-center mb-5">
             <span className="text-xs font-medium text-[hsl(var(--fg-muted))] border border-[hsl(var(--border))] px-4 py-1.5 rounded-full">
-              Digital Transformer · Federal Financial Manager · Data Scientist · Agentic AI Developer 
+              AI Enabler · Federal Financial Manager · Data Scientist · GS-15
             </span>
           </div>
 
@@ -113,6 +114,13 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PortfolioDashboard stats={stats} articles={articles} />
       </section>
+
+      {/* ── TECH PULSE — AI Summary + Category Tabs ────────── */}
+      {articles.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <TechPulsePanel articles={articles} />
+        </section>
+      )}
 
       {/* ── EXPLORE TABS ─────────────────────────────────────── */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[hsl(var(--border))]">

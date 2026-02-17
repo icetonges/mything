@@ -1,66 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateWithFallback, PETER_CONTEXT } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-
+import { runAgent, routeToAgent, AGENTS } from "@/lib/ai/agent";
 
 export const runtime = "nodejs";
 
 const Schema = z.object({
-  messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string() })),
-  page: z.string().optional(),
+  messages:  z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string() })),
+  page:      z.string().optional(),
   sessionId: z.string().optional(),
+  agentId:   z.string().optional(),
 });
-
-const PAGE_CONTEXTS: Record<string, string> = {
-  "fed-finance": "The user is on the Federal Finance page. Focus on OMB circulars, federal budgeting, appropriations law, and Peter's Pentagon expertise. Be authoritative and policy-accurate.",
-  "ai-ml": "The user is on the AI & ML page. Focus on AI/ML concepts, Peter's Kaggle notebooks, Google AI Agents Intensive, and applying AI to federal finance.",
-  "my-work": "The user is on the My Work / Portfolio page. Help them understand Peter's projects, tech stack, and capabilities. Link to relevant repos and live sites.",
-  "family-math": "You are a friendly math tutor for kids. Explain math step by step in simple, encouraging language. Use fun examples. Never be condescending. Celebrate correct answers!",
-  "home": "General assistant. Help with anything related to Peter's background, expertise, and platform.",
-};
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('[Chat API] Request received:', { page: body.page, messageCount: body.messages?.length });
-    
-    const { messages, page, sessionId } = Schema.parse(body);
+    const { messages, page, sessionId, agentId } = Schema.parse(body);
 
-    const sid = sessionId ?? crypto.randomUUID();
-    const pageCtx = PAGE_CONTEXTS[page ?? "home"] ?? PAGE_CONTEXTS.home;
-    const systemPrompt = `${PETER_CONTEXT}\n\nCurrent page context: ${pageCtx}`;
-
-    const historyText = messages
-      .map(m => `${m.role === "user" ? "Human" : "Assistant"}: ${m.content}`)
-      .join("\n");
-
+    const sid      = sessionId ?? crypto.randomUUID();
     const lastUser = messages.filter(m => m.role === "user").pop()?.content ?? "";
-    const prompt = historyText.length > lastUser.length
-      ? `Conversation so far:\n${historyText}\n\nProvide a helpful, concise response to the last user message.`
-      : lastUser;
 
-    const content = await generateWithFallback(prompt, systemPrompt);
-    console.log('[Chat API] Response generated:', { contentLength: content.length, sessionId: sid });
+    // History = everything except the last user message
+    const history = messages.slice(0, -1);
 
-    // Store in DB (non-blocking)
-    try {
-      await prisma.chatHistory.createMany({
-        data: [
-          { sessionId: sid, role: "user", content: lastUser, page },
-          { sessionId: sid, role: "assistant", content, page },
-        ],
-      });
-    } catch (dbErr) {
-      console.error('[Chat API] DB save failed (non-fatal):', dbErr);
-    }
+    // Auto-route to appropriate agent, or use pinned agentId
+    const resolvedAgentId = agentId ?? routeToAgent(lastUser, page ?? "home");
+    const agentConfig     = AGENTS[resolvedAgentId] ?? AGENTS.portfolio;
 
-    return NextResponse.json({ content, sessionId: sid });
+    console.log(`[Agent] "${agentConfig.name}" | page: ${page} | "${lastUser.substring(0, 50)}"`);
+
+    const result = await runAgent(resolvedAgentId, lastUser, history);
+
+    console.log(`[Agent] Done — ${result.steps.length} steps, ${result.answer.length} chars`);
+
+    // Persist to DB — non-blocking, never fails the response
+    prisma.chatHistory.createMany({
+      data: [
+        { sessionId: sid, role: "user",      content: lastUser,      page },
+        { sessionId: sid, role: "assistant",  content: result.answer, page },
+      ],
+    }).catch(e => console.error("[Agent] DB save failed:", e));
+
+    return NextResponse.json({
+      content:    result.answer,
+      steps:      result.steps,
+      agentId:    result.agentId,
+      agentName:  result.agentName,
+      agentEmoji: result.agentEmoji,
+      sessionId:  sid,
+    });
+
   } catch (err) {
-    console.error('[Chat API] Error:', err);
-    return NextResponse.json({ 
-      error: 'Chat failed', 
-      details: process.env.NODE_ENV === 'development' ? String(err) : undefined 
+    console.error("[Agent] Fatal:", err);
+    return NextResponse.json({
+      content: "I had trouble processing that. Please try again.",
+      steps:   [],
+      error:   process.env.NODE_ENV === "development" ? String(err) : undefined,
     }, { status: 500 });
   }
 }

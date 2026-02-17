@@ -61,9 +61,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-[hsl(var(--border))] mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-[hsl(var(--fg-muted))]">
+        <div className="border-t border-[hsl(var(--border))] mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-[hsl(var(--fg-muted))]">
           <span>© {new Date().getFullYear()} {OWNER.shortName}. All rights reserved.</span>
-          <span>Built with Next.js 15 · Gemini 2.5 · Vercel</span>
+          <div className="flex flex-wrap justify-center items-center gap-2">
+            {[
+              'Next.js 15', 'React 19', 'TypeScript',
+              'Python 3.12', 'Gemini AI', 'Prisma',
+              'PostgreSQL', 'GitHub Actions', 'Vercel',
+            ].map((tech, i, arr) => (
+              <span key={tech} className="flex items-center gap-2">
+                <span className="hover:text-[hsl(var(--accent))] transition-colors cursor-default">{tech}</span>
+                {i < arr.length - 1 && <span className="opacity-30">·</span>}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
