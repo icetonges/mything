@@ -95,10 +95,10 @@ export async function runAgent(
         history,
       });
 
-      let currentContents: string | object[] = userMessage;
+      let currentContents: string | { functionResponse: { id?: string; name: string; response: { output?: string; error?: string } } }[] = userMessage;
 
       for (let i = 0; i < config.maxIterations; i++) {
-        const response = await chat.sendMessage(currentContents as string);
+        const response = await chat.sendMessage(currentContents);
 
         const functionCalls = response.functionCalls ?? [];
 
