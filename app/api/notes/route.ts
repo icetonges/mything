@@ -19,11 +19,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = NoteSchema.parse(body);
+    console.log('[Notes API] Creating note:', { contentLength: data.content.length, mood: data.mood });
 
     // Create note first
     const note = await prisma.dailyNote.create({
       data: { content: data.content, mood: data.mood, tags: data.tags ?? [], quickType: data.quickType },
     });
+    console.log('[Notes API] Note created:', note.id);
 
     // Process with AI
     const ai = await processNote(data.content);
@@ -44,10 +46,11 @@ export async function POST(req: NextRequest) {
         aiProcessedAt: new Date(),
       },
     });
+    console.log('[Notes API] AI processing complete:', { headline: ai.headline, sentiment: ai.sentiment });
 
     return NextResponse.json(updated);
   } catch (err) {
-    console.error("Note save error:", err);
+    console.error('[Notes API] Save error:', err);
     return NextResponse.json({ error: "Failed to save note" }, { status: 500 });
   }
 }

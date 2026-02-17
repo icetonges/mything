@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { LINKS, OWNER } from '@/lib/constants';
-import { Send, Github, Linkedin, Mail, BookOpen, BarChart2, CheckCircle } from 'lucide-react';
+import { LINKS } from '@/lib/constants';
+import { Send, Github, Linkedin, BookOpen, BarChart2, CheckCircle } from 'lucide-react';
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -38,11 +38,10 @@ export default function ContactSection() {
 
           <div className="space-y-3">
             {[
-              { icon: Mail,     label: 'Email',     value: OWNER.email,    href: `mailto:${OWNER.email}` },
-              { icon: Github,   label: 'GitHub',    value: 'icetonges',    href: LINKS.github },
-              { icon: Linkedin, label: 'LinkedIn',  value: 'Peter Shang',  href: LINKS.linkedin },
-              { icon: BarChart2,label: 'Kaggle',    value: 'icetonges',    href: LINKS.kaggle },
-              { icon: BookOpen, label: 'Resume',    value: 'petershang.vercel.app', href: LINKS.resume },
+              { icon: Github,    label: 'GitHub',   value: 'icetonges',            href: LINKS.github },
+              { icon: Linkedin,  label: 'LinkedIn', value: 'Peter Shang',          href: LINKS.linkedin },
+              { icon: BarChart2, label: 'Kaggle',   value: 'icetonges',            href: LINKS.kaggle },
+              { icon: BookOpen,  label: 'Resume',   value: 'petershang.vercel.app', href: LINKS.resume },
             ].map(({ icon: Icon, label, value, href }) => (
               <a key={label} href={href} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.04)] transition-all group">

@@ -26,11 +26,16 @@ export async function generateWithFallback(prompt: string, systemPrompt?: string
       });
       const result = await model.generateContent(prompt);
       const text = result.response.text();
-      if (text) return text;
-    } catch {
+      if (text) {
+        console.log(`[Gemini] Success with model: ${modelName}`);
+        return text;
+      }
+    } catch (err) {
+      console.error(`[Gemini] ${modelName} failed:`, err instanceof Error ? err.message : String(err));
       continue;
     }
   }
+  console.error('[Gemini] All models failed, returning fallback');
   return 'AI processing temporarily unavailable. Please try again.';
 }
 
@@ -61,15 +66,33 @@ Return exactly this JSON structure:
 
   try {
     const raw = await generateWithFallback(prompt);
+    console.log('[processNote] Raw AI response length:', raw.length);
+    
     const cleaned = raw.replace(/```json|```/g, '').trim();
-    return JSON.parse(cleaned);
-  } catch {
+    const parsed = JSON.parse(cleaned);
+    
+    // Validate required fields
+    if (!parsed.headline || !parsed.summary) {
+      throw new Error('Missing required AI fields');
+    }
+    
+    console.log('[processNote] AI analysis successful');
+    return {
+      headline: parsed.headline,
+      summary: parsed.summary,
+      keyIdeas: Array.isArray(parsed.keyIdeas) ? parsed.keyIdeas : [],
+      actionItems: Array.isArray(parsed.actionItems) ? parsed.actionItems : [],
+      themes: Array.isArray(parsed.themes) ? parsed.themes : [],
+      sentiment: parsed.sentiment || 'neutral',
+    };
+  } catch (err) {
+    console.error('[processNote] AI analysis failed:', err instanceof Error ? err.message : String(err));
     return {
       headline: content.substring(0, 100),
-      summary: '• Note captured successfully\n• AI processing encountered an issue\n• Content saved',
+      summary: '• Note captured successfully\n• AI processing encountered an issue\n• Content saved - you can view it in the archive',
       keyIdeas: [],
       actionItems: [],
-      themes: [],
+      themes: ['uncategorized'],
       sentiment: 'neutral',
     };
   }
@@ -97,7 +120,7 @@ Online Presence:
 - Portfolio: https://petershang.vercel.app
 - GitHub: https://github.com/icetonges (29+ repos)
 - Kaggle: https://www.kaggle.com/icetonges
-- LinkedIn: https://www.linkedin.com/in/xiaobing-peter-shang/
+- LinkedIn: https://www.linkedin.com/in/petershang/
 
 You have access to real-time web search. Be helpful, precise, and professional.
 For federal finance questions, provide authoritative, policy-accurate answers.

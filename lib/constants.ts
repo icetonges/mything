@@ -2,7 +2,7 @@ export const LINKS = {
   resume:    'https://petershang.vercel.app',
   github:    'https://github.com/icetonges',
   kaggle:    'https://www.kaggle.com/icetonges',
-  linkedin:  'https://www.linkedin.com/in/xiaobing-peter-shang/',
+  linkedin:  'https://www.linkedin.com/in/petershang/',
   portfolio: 'https://budgetmatter.github.io',
   email:     'icetonges@gmail.com',
 };

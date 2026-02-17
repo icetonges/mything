@@ -1,7 +1,7 @@
-import { Landmark, BookOpen, Scale, ArrowRight } from "lucide-react";
+'use client';
+import { useState } from "react";
+import { Landmark, BookOpen, Scale, ArrowRight, ChevronDown } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";
-
-export const revalidate = 86400;
 
 const POLICIES = [
   { name: "OMB Circular A-11", area: "Budget Formulation", desc: "Preparation, submission, and execution of the President\'s Budget. Governs all federal agency budget submissions.", peter: "Led preparation of $338B DoD budget submissions per A-11 requirements at the Pentagon." },
@@ -23,6 +23,8 @@ const BUDGET_PHASES = [
 ];
 
 export default function FedFinancePage() {
+  const [expanded, setExpanded] = useState<number | null>(null);
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-10">
@@ -84,21 +86,31 @@ export default function FedFinancePage() {
           <h2 className="font-display text-xl font-bold">Policy Reference</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {POLICIES.map(p => (
-            <div key={p.name} className="card p-5 hover:border-green-500/30 transition-all">
-              <div className="flex items-start gap-3 mb-2">
-                <div>
+          {POLICIES.map((p, i) => (
+            <button
+              key={p.name}
+              onClick={() => setExpanded(expanded === i ? null : i)}
+              className="card p-5 hover:border-green-500/30 transition-all text-left w-full group">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-sm">{p.name}</h3>
                     <span className="text-[10px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">{p.area}</span>
                   </div>
                   <p className="text-xs text-[hsl(var(--fg-muted))] leading-relaxed mb-2">{p.desc}</p>
-                  <div className="border-l-2 border-green-500/30 pl-3">
-                    <p className="text-xs text-green-300 italic">{p.peter}</p>
-                  </div>
+                  
+                  {expanded === i && (
+                    <div className="border-l-2 border-green-500/30 pl-3 mt-3 pt-3">
+                      <p className="text-xs font-semibold text-green-400 mb-1">Peter's Experience:</p>
+                      <p className="text-xs text-green-300 italic leading-relaxed">{p.peter}</p>
+                    </div>
+                  )}
                 </div>
+                <ChevronDown 
+                  className={`h-4 w-4 text-green-400 transition-transform flex-shrink-0 mt-1 ${expanded === i ? 'rotate-180' : ''}`} 
+                />
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </section>

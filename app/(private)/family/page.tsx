@@ -81,7 +81,7 @@ export default function FamilyPage() {
             <div className="space-y-2 pt-2 border-t border-[hsl(var(--border))]">
               <p className="text-xs text-[hsl(var(--fg-muted))]">This session ({savedNotes.length})</p>
               {savedNotes.slice(0, 3).map((n, i) => (
-                <p key={i} className="text-sm text-[hsl(var(--fg-muted))] border-l-2 border-pink-400/30 pl-2">{n}</p>
+                <p key={i} className="text-sm text-[hsl(var(--fg-muted))] border-l-2 border-pink-400/30 pl-2 break-all overflow-hidden">{n}</p>
               ))}
             </div>
           )}

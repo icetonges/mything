@@ -1,29 +1,65 @@
+'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { formatDateShort } from '@/lib/utils';
-import { Tag, ArrowRight } from 'lucide-react';
+import { Tag, ArrowRight, Trash2 } from 'lucide-react';
 
 interface NoteCardProps {
   id: string; date: Date; headline?: string | null; summary?: string | null;
   tags?: string[]; themes?: string[]; sentiment?: string | null; slug?: string | null;
   quickType?: string | null;
+  onDelete?: () => void;
 }
 
 const QUICK_EMOJIS: Record<string, string> = { idea: '💡', trend: '📰', goal: '🎯', note: '📝', insight: '⚡' };
 
-export function NoteCard({ id: _id, date, headline, summary, tags, themes: _themes, sentiment, slug, quickType }: NoteCardProps) {
+export function NoteCard({ id, date, headline, summary, tags, themes: _themes, sentiment, slug, quickType, onDelete }: NoteCardProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm('Move this note to trash?')) return;
+    
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        onDelete?.();
+        window.location.reload();
+      } else {
+        alert('Failed to delete note');
+      }
+    } catch (err) {
+      alert('Error deleting note');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="card-base p-5 hover:border-orange-400/30 transition-all group">
+    <div className="card-base p-5 hover:border-orange-400/30 transition-all group relative">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">{QUICK_EMOJIS[quickType || 'note'] || '📝'}</span>
           <span className="text-xs text-muted-foreground">{formatDateShort(date)}</span>
           {sentiment && <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{sentiment}</span>}
         </div>
-        {slug && (
-          <Link href={`/archive/${slug}`} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-accent">
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {slug && (
+            <Link href={`/archive/${slug}`} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-accent">
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400 disabled:opacity-50"
+            title="Delete note">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {headline && <p className="font-semibold text-foreground text-sm mb-2 leading-snug">{headline}</p>}

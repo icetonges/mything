@@ -180,7 +180,7 @@ export default function NotesPage() {
         </div>
 
         {/* ─ AI OUTPUT PANEL ─ */}
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           {aiResult ? (
             <>
               <div className="flex items-center gap-2 mb-2">
@@ -196,7 +196,7 @@ export default function NotesPage() {
               {/* Headline */}
               <div className="card p-4 border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.04)]">
                 <p className="text-[10px] text-[hsl(var(--accent))] font-semibold uppercase tracking-wider mb-1">Headline</p>
-                <p className="font-display font-bold text-base leading-snug">{aiResult.headline}</p>
+                <p className="font-display font-bold text-base leading-snug break-all">{aiResult.headline}</p>
                 {aiResult.sentiment && (
                   <p className={`text-xs mt-2 font-medium ${SENTIMENT_COLORS[aiResult.sentiment] ?? "text-[hsl(var(--fg-muted))]"}`}>
                     ● {aiResult.sentiment.charAt(0).toUpperCase() + aiResult.sentiment.slice(1)} sentiment
@@ -206,11 +206,11 @@ export default function NotesPage() {
 
               {/* Summary */}
               {aiResult.summary && (
-                <div className="card p-4">
+                <div className="card p-4 max-h-64 overflow-y-auto">
                   <p className="text-[10px] text-[hsl(var(--fg-muted))] font-semibold uppercase tracking-wider mb-2">Executive Summary</p>
                   <div className="space-y-1">
                     {aiResult.summary.split("\n").map((line, i) => (
-                      <p key={i} className="text-sm leading-relaxed">{line}</p>
+                      <p key={i} className="text-sm leading-relaxed break-words">{line}</p>
                     ))}
                   </div>
                 </div>
@@ -221,11 +221,11 @@ export default function NotesPage() {
                 {aiResult.keyIdeas.length > 0 && (
                   <div className="card p-4">
                     <p className="text-[10px] text-[hsl(var(--fg-muted))] font-semibold uppercase tracking-wider mb-2">Key Ideas</p>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-1.5 max-h-48 overflow-y-auto">
                       {aiResult.keyIdeas.map((idea, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">
-                          <span className="text-[hsl(var(--accent))] mt-0.5">→</span>
-                          <span>{idea}</span>
+                          <span className="text-[hsl(var(--accent))] mt-0.5 flex-shrink-0">→</span>
+                          <span className="break-words">{idea}</span>
                         </li>
                       ))}
                     </ul>
@@ -236,11 +236,11 @@ export default function NotesPage() {
                 {aiResult.actionItems.length > 0 && (
                   <div className="card p-4">
                     <p className="text-[10px] text-[hsl(var(--fg-muted))] font-semibold uppercase tracking-wider mb-2">Action Items</p>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-1.5 max-h-48 overflow-y-auto">
                       {aiResult.actionItems.map((item, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">
-                          <span className="text-orange-400 mt-0.5">☐</span>
-                          <span>{item}</span>
+                          <span className="text-orange-400 mt-0.5 flex-shrink-0">☐</span>
+                          <span className="break-words">{item}</span>
                         </li>
                       ))}
                     </ul>

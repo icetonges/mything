@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { Archive, Search, Tag, Calendar } from "lucide-react";
+import { Archive, Search, Tag, Calendar, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import { DeleteNoteButton } from "@/components/notes/DeleteNoteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -58,14 +59,21 @@ export default async function ArchivePage({ searchParams }: SearchProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center">
-          <Archive size={20} className="text-slate-400" />
+      <div className="mb-8 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center">
+            <Archive size={20} className="text-slate-400" />
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold">Note Archive</h1>
+            <p className="text-xs text-[hsl(var(--fg-muted))]">{totalCount} notes captured</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display text-2xl font-bold">Note Archive</h1>
-          <p className="text-xs text-[hsl(var(--fg-muted))]">{totalCount} notes captured</p>
-        </div>
+        <Link 
+          href="/archive/trash" 
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[hsl(var(--border))] hover:border-red-500/30 text-sm text-[hsl(var(--fg-muted))] hover:text-red-400 transition-colors">
+          <Trash2 size={14} /> Trash
+        </Link>
       </div>
 
       {/* Search */}
@@ -141,10 +149,13 @@ export default async function ArchivePage({ searchParams }: SearchProps) {
                           </div>
                         )}
                       </div>
-                      {n.slug && (
-                        <Link href={`/archive/${n.slug}`}
-                          className="text-xs text-[hsl(var(--accent))] hover:underline flex-shrink-0">View →</Link>
-                      )}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {n.slug && (
+                          <Link href={`/archive/${n.slug}`}
+                            className="text-xs text-[hsl(var(--accent))] hover:underline">View →</Link>
+                        )}
+                        <DeleteNoteButton noteId={n.id} />
+                      </div>
                     </div>
                   </div>
                 ))}

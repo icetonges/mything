@@ -18,7 +18,7 @@
     "@prisma/client": "^5.22.0",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
-    "next": "15.2.6",
+    "next": "15.2.8",
     "next-auth": "^5.0.0-beta.30",
     "nodemailer": "^7.0.3",
     "react": "^19.0.0",

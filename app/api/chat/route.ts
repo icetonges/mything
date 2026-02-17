@@ -23,6 +23,8 @@ const PAGE_CONTEXTS: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('[Chat API] Request received:', { page: body.page, messageCount: body.messages?.length });
+    
     const { messages, page, sessionId } = Schema.parse(body);
 
     const sid = sessionId ?? crypto.randomUUID();
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
       : lastUser;
 
     const content = await generateWithFallback(prompt, systemPrompt);
+    console.log('[Chat API] Response generated:', { contentLength: content.length, sessionId: sid });
 
     // Store in DB (non-blocking)
     try {
@@ -48,11 +51,16 @@ export async function POST(req: NextRequest) {
           { sessionId: sid, role: "assistant", content, page },
         ],
       });
-    } catch {}
+    } catch (dbErr) {
+      console.error('[Chat API] DB save failed (non-fatal):', dbErr);
+    }
 
     return NextResponse.json({ content, sessionId: sid });
   } catch (err) {
-    console.error("Chat error:", err);
-    return NextResponse.json({ error: "Chat failed" }, { status: 500 });
+    console.error('[Chat API] Error:', err);
+    return NextResponse.json({ 
+      error: 'Chat failed', 
+      details: process.env.NODE_ENV === 'development' ? String(err) : undefined 
+    }, { status: 500 });
   }
 }
