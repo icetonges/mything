@@ -147,7 +147,8 @@ export async function runAgent(
       }
 
       // Max iterations — get final answer
-      const final = await chat.sendMessage("Please provide your final answer now.");
+      //const final = await chat.sendMessage("Please provide your final answer now.");
+      const final = await chat.sendMessage({ message: "Please provide your final answer now." });
       const finalAnswer = (final.text ?? "").trim();
       steps.push({ type: "answer", content: finalAnswer });
       return { steps, answer: finalAnswer, agentId: config.id, agentName: config.name, agentEmoji: config.emoji };
