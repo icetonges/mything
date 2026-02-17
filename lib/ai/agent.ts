@@ -105,27 +105,29 @@ export async function runAgent(
           // Execute tools and build functionResponse parts
           const functionResponseParts = await Promise.all(
             functionCalls.map(async (fc) => {
+              const toolName = fc.name ?? "unknown_tool";
+              
               steps.push({
                 type: "tool_call",
-                content: `${fc.name}(${JSON.stringify(fc.args ?? {})})`,
-                tool: fc.name, data: fc.args,
+                content: `${toolName}(${JSON.stringify(fc.args ?? {})})`,
+                tool: toolName, data: fc.args,
               });
 
-              const handler = TOOL_HANDLERS[fc.name];
+              const handler = TOOL_HANDLERS[toolName];
               const toolResult = handler
                 ? await handler(fc.args as Record<string, unknown>)
-                : { success: false, error: `Unknown tool: ${fc.name}` };
+                : { success: false, error: `Unknown tool: ${toolName}` };
 
               steps.push({
                 type: "tool_result",
                 content: JSON.stringify(toolResult.data ?? { error: toolResult.error }, null, 2),
-                tool: fc.name, data: toolResult.data,
+                tool: toolName, data: toolResult.data,
               });
 
               return {
                 functionResponse: {
                   id:       fc.id,
-                  name:     fc.name,
+                  name:     toolName,
                   response: toolResult.success
                     ? { output: JSON.stringify(toolResult.data) }
                     : { error: toolResult.error ?? "Tool failed" },
