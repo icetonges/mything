@@ -1,14 +1,10 @@
 /**
  * lib/ai/tools.ts
- *
  * Tools wired to Gemini's NATIVE function-calling API.
- * The SDK returns structured functionCalls() — no text parsing needed.
- *
- * Each tool has:
- *   declaration  — schema Gemini uses to decide when/how to call it
- *   handler      — async function that executes and returns data
+ * Uses SchemaType enum so TypeScript is satisfied by the SDK's FunctionDeclaration type.
  */
 import { prisma } from "@/lib/prisma";
+import { SchemaType } from "@google/generative-ai";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 export interface ToolResult {
@@ -16,7 +12,6 @@ export interface ToolResult {
   data?:   unknown;
   error?:  string;
 }
-
 export type ToolArgs = Record<string, unknown>;
 
 // ── Tool 1: search_tech_articles ──────────────────────────────────────────
@@ -39,15 +34,13 @@ async function searchTechArticles(args: ToolArgs): Promise<ToolResult> {
       select: { title: true, url: true, source: true, category: true, summary: true, publishedAt: true },
     });
     return { success: true, data: { count: articles.length, articles } };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  } catch (e) { return { success: false, error: String(e) }; }
 }
 
 // ── Tool 2: search_dod_news ───────────────────────────────────────────────
 async function searchDodNews(args: ToolArgs): Promise<ToolResult> {
   const topic = args.topic as string | undefined;
-  const type  = (args.type as string | undefined) ?? "all";
+  const type  = (args.type  as string | undefined) ?? "all";
   const limit = (args.limit as number | undefined) ?? 5;
   const categoryMap: Record<string, string[]> = {
     audit:  ["DoD Audit"],
@@ -69,9 +62,7 @@ async function searchDodNews(args: ToolArgs): Promise<ToolResult> {
       select: { title: true, url: true, source: true, category: true, summary: true, publishedAt: true },
     });
     return { success: true, data: { count: articles.length, articles } };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  } catch (e) { return { success: false, error: String(e) }; }
 }
 
 // ── Tool 3: save_note ─────────────────────────────────────────────────────
@@ -90,9 +81,7 @@ async function saveNote(args: ToolArgs): Promise<ToolResult> {
       },
     });
     return { success: true, data: { id: note.id, headline: note.headline } };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  } catch (e) { return { success: false, error: String(e) }; }
 }
 
 // ── Tool 4: get_recent_notes ──────────────────────────────────────────────
@@ -105,9 +94,7 @@ async function getRecentNotes(args: ToolArgs): Promise<ToolResult> {
       select: { id: true, date: true, headline: true, summary: true, sentiment: true, tags: true, quickType: true },
     });
     return { success: true, data: { count: notes.length, notes } };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  } catch (e) { return { success: false, error: String(e) }; }
 }
 
 // ── Tool 5: get_platform_stats ────────────────────────────────────────────
@@ -121,9 +108,7 @@ async function getPlatformStats(_args: ToolArgs): Promise<ToolResult> {
       prisma.techArticle.count({ where: { category: { in: ["DoD Audit", "DoD Budget", "DoD Policy"] } } }),
     ]);
     return { success: true, data: { totalNotes, totalArticles, totalChats, last24hNotes, dodArticles } };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  } catch (e) { return { success: false, error: String(e) }; }
 }
 
 // ── Handler registry ──────────────────────────────────────────────────────
@@ -135,19 +120,18 @@ export const TOOL_HANDLERS: Record<string, (args: ToolArgs) => Promise<ToolResul
   get_platform_stats:   getPlatformStats,
 };
 
-// ── Gemini native functionDeclarations schema ─────────────────────────────
-// These are passed directly to getGenerativeModel({ tools: [...] })
-// Gemini SDK returns typed functionCalls() — no text parsing needed.
+// ── Gemini native functionDeclarations — using SchemaType enum ────────────
+// SchemaType.OBJECT / STRING / NUMBER / ARRAY satisfies FunctionDeclaration type
 export const TOOL_DECLARATIONS = [
   {
     name: "search_tech_articles",
     description: "Search the database for tech news articles. Use for AI, cloud, cybersecurity, web dev topics.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        query:    { type: "string",  description: "Search keyword or topic" },
-        category: { type: "string",  description: "Filter: AI/ML | Cloud | Cybersecurity | Web Dev | Federal Tech" },
-        limit:    { type: "number",  description: "Max results (default 5)" },
+        query:    { type: SchemaType.STRING, description: "Search keyword or topic" },
+        category: { type: SchemaType.STRING, description: "Filter: AI/ML | Cloud | Cybersecurity | Web Dev | Federal Tech" },
+        limit:    { type: SchemaType.NUMBER, description: "Max results (default 5)" },
       },
       required: [],
     },
@@ -156,11 +140,11 @@ export const TOOL_DECLARATIONS = [
     name: "search_dod_news",
     description: "Search DoD-specific news: audit findings, budget updates, policy memos, OMB circulars.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        topic: { type: "string", description: "Search topic (e.g. 'FIAR', 'A-11', 'continuing resolution')" },
-        type:  { type: "string", description: "Category filter: audit | budget | policy | all (default: all)" },
-        limit: { type: "number", description: "Max results (default 5)" },
+        topic: { type: SchemaType.STRING, description: "Search topic (e.g. 'FIAR', 'A-11', 'continuing resolution')" },
+        type:  { type: SchemaType.STRING, description: "Category filter: audit | budget | policy | all (default: all)" },
+        limit: { type: SchemaType.NUMBER, description: "Max results (default 5)" },
       },
       required: [],
     },
@@ -169,12 +153,12 @@ export const TOOL_DECLARATIONS = [
     name: "save_note",
     description: "Save a note to the database. ALWAYS confirm exact content with the user before calling this.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        content:   { type: "string",  description: "The note content to save" },
-        tags:      { type: "array",   items: { type: "string" }, description: "Optional tags" },
-        mood:      { type: "number",  description: "Mood 1-5 (1=sad, 5=energized)" },
-        quickType: { type: "string",  description: "Type: note | idea | goal | insight | trend" },
+        content:   { type: SchemaType.STRING, description: "The note content to save" },
+        tags:      { type: SchemaType.ARRAY,  items: { type: SchemaType.STRING }, description: "Optional tags" },
+        mood:      { type: SchemaType.NUMBER, description: "Mood 1-5 (1=sad, 5=energized)" },
+        quickType: { type: SchemaType.STRING, description: "Type: note | idea | goal | insight | trend" },
       },
       required: ["content"],
     },
@@ -183,9 +167,9 @@ export const TOOL_DECLARATIONS = [
     name: "get_recent_notes",
     description: "Retrieve Peter's most recent personal notes for reflection or summarization.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
-        limit: { type: "number", description: "Number of notes to retrieve (default 5)" },
+        limit: { type: SchemaType.NUMBER, description: "Number of notes to retrieve (default 5)" },
       },
       required: [],
     },
@@ -194,7 +178,7 @@ export const TOOL_DECLARATIONS = [
     name: "get_platform_stats",
     description: "Get live usage statistics: total notes, articles, chats, and DoD content count.",
     parameters: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {},
       required: [],
     },

@@ -16,6 +16,7 @@ import {
   HarmCategory,
   HarmBlockThreshold,
   type FunctionCall,
+  type FunctionDeclaration,
 } from "@google/generative-ai";
 import { TOOL_DECLARATIONS, TOOL_HANDLERS } from "./tools";
 import { PETER_CONTEXT } from "@/lib/gemini";
@@ -144,7 +145,7 @@ export async function runAgent(
         model: modelName,
         safetySettings: SAFETY,
         systemInstruction: config.systemPrompt,  // ← correct placement (not in message)
-        tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
+        tools: [{ functionDeclarations: TOOL_DECLARATIONS as FunctionDeclaration[] }],
       });
 
       // Build chat history in Gemini format
