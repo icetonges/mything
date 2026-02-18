@@ -1,6 +1,6 @@
 import { PROJECTS } from "@/lib/projects";
 import { LINKS } from "@/lib/constants";
-import { Briefcase, ExternalLink, Github, Star } from "lucide-react";
+import { Briefcase, ExternalLink, Github, Star, Brain } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";
 
 export const revalidate = 86400;
@@ -33,17 +33,24 @@ export default function MyWorkPage() {
         <p className="text-[hsl(var(--fg-muted))] max-w-2xl">Portfolio spanning federal financial management, data science, AI/ML research, and full-stack engineering.</p>
       </div>
 
-      {/* CTA links */}
+      {/* CTA links - UPDATED with ML AI Hub button */}
       <div className="flex flex-wrap gap-3 mb-12">
         {[
-          { label: "Resume Site", href: LINKS.resume, icon: "📄" },
-          { label: "GitHub (29+ repos)", href: LINKS.github, icon: "🐙" },
-          { label: "Kaggle Profile", href: LINKS.kaggle, icon: "📊" },
-          { label: "Portfolio", href: LINKS.portfolio, icon: "🌐" },
+          { label: "Resume Site", href: LINKS.resume, icon: "📄", special: false },
+          { label: "ML AI Knowledge Hub", href: "https://mlaithing.vercel.app", icon: <Brain size={14} className="text-purple-400" />, special: true },
+          { label: "GitHub (29+ repos)", href: LINKS.github, icon: "🐙", special: false },
+          { label: "Kaggle Profile", href: LINKS.kaggle, icon: "📊", special: false },
+          { label: "Portfolio", href: LINKS.portfolio, icon: "🌐", special: false },
         ].map(l => (
           <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.05)] transition-all text-sm font-medium">
-            <span>{l.icon}</span> {l.label} <ExternalLink size={13} className="text-[hsl(var(--fg-muted))]" />
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              l.special
+                ? 'border-2 border-purple-500/40 bg-gradient-to-r from-purple-500/10 to-blue-500/10 hover:border-purple-500/60 hover:from-purple-500/20 hover:to-blue-500/20'
+                : 'border border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.05)]'
+            }`}>
+            {typeof l.icon === 'string' ? <span>{l.icon}</span> : l.icon} 
+            {l.label} 
+            <ExternalLink size={13} className="text-[hsl(var(--fg-muted))]" />
           </a>
         ))}
       </div>

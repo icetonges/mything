@@ -9,7 +9,7 @@ import ContactSection from '@/components/home/ContactSection';
 import PortfolioDashboard from '@/components/home/PortfolioDashboard';
 import TechPulsePanel from '@/components/home/TechPulsePanel';
 import * as Icons from 'lucide-react';
-import { ExternalLink, ArrowRight, Github, Award } from 'lucide-react';
+import { ExternalLink, ArrowRight, Github, Award, Brain } from 'lucide-react';
 
 export const revalidate = 3600;
 
@@ -78,12 +78,21 @@ export default async function HomePage() {
             </span>
           </div>
 
-          {/* CTA buttons — centered */}
+          {/* CTA buttons — centered with NEW ML AI Hub button */}
           <div className="flex flex-wrap justify-center gap-3 mb-5">
             <a href={LINKS.resume} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl gold-bg font-semibold text-sm hover:opacity-90 transition-opacity">
               View Resume <ExternalLink size={14} />
             </a>
+            
+            {/* NEW: ML AI Hub Button */}
+            <a href="https://mlaithing.vercel.app" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-purple-500/40 bg-gradient-to-r from-purple-500/10 to-blue-500/10 font-semibold text-sm hover:border-purple-500/60 hover:from-purple-500/20 hover:to-blue-500/20 transition-all">
+              <Brain size={14} className="text-purple-400" />
+              ML AI Knowledge Hub
+              <ExternalLink size={14} />
+            </a>
+            
             <Link href="/my-work"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[hsl(var(--border))] font-semibold text-sm hover:border-[hsl(var(--accent)/0.5)] hover:bg-[hsl(var(--accent)/0.05)] transition-all">
               See My Work <ArrowRight size={14} />
@@ -112,38 +121,8 @@ export default async function HomePage() {
         <PortfolioDashboard stats={stats} articles={articles} />
       </section>
 
-      {/* ── EXPLORE TABS ─────────────────────────────────────── */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[hsl(var(--border))]">
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--accent))] mb-1">Explore</p>
-          <h2 className="font-display text-2xl font-bold">Everything in One Place</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {publicTabs.map(item => (
-            <Link key={item.href} href={item.href}
-              className="group card p-5 hover:border-[hsl(var(--accent)/0.3)] transition-all duration-300 hover:-translate-y-1"
-              style={{ background: COLOR_MAP[item.color] ?? 'hsl(var(--bg-card))' }}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-9 h-9 rounded-lg bg-[hsl(var(--bg-card))] flex items-center justify-center border border-[hsl(var(--border))]">
-                  <NavIcon name={item.icon} />
-                </div>
-                <ArrowRight size={15} className="text-[hsl(var(--fg-muted))] group-hover:text-[hsl(var(--accent))] group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <h3 className="font-semibold text-sm mb-1 group-hover:text-[hsl(var(--accent))] transition-colors">{item.label}</h3>
-              <p className="text-xs text-[hsl(var(--fg-muted))] leading-snug">{item.description}</p>
-            </Link>
-          ))}
-          <div className="card p-5 border-dashed opacity-50">
-            <div className="w-9 h-9 rounded-lg bg-[hsl(var(--bg-muted))] flex items-center justify-center mb-3 border border-[hsl(var(--border))]">
-              <Icons.Lock size={16} className="text-[hsl(var(--fg-muted))]" />
-            </div>
-            <h3 className="font-semibold text-sm mb-1">Private Spaces</h3>
-            <p className="text-xs text-[hsl(var(--fg-muted))] leading-snug">Notes · Archive · Family — owner access only</p>
-          </div>
-        </div>
-      </section>
-
       {/* ── FEATURED PROJECTS ────────────────────────────────── */}
+      {/* MOVED UP - now appears before Explore section */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[hsl(var(--border))]">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -185,6 +164,38 @@ export default async function HomePage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── EXPLORE TABS ─────────────────────────────────────── */}
+      {/* MOVED DOWN - now appears after Featured Projects */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[hsl(var(--border))]">
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--accent))] mb-1">Explore</p>
+          <h2 className="font-display text-2xl font-bold">Everything in One Place</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {publicTabs.map(item => (
+            <Link key={item.href} href={item.href}
+              className="group card p-5 hover:border-[hsl(var(--accent)/0.3)] transition-all duration-300 hover:-translate-y-1"
+              style={{ background: COLOR_MAP[item.color] ?? 'hsl(var(--bg-card))' }}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-9 h-9 rounded-lg bg-[hsl(var(--bg-card))] flex items-center justify-center border border-[hsl(var(--border))]">
+                  <NavIcon name={item.icon} />
+                </div>
+                <ArrowRight size={15} className="text-[hsl(var(--fg-muted))] group-hover:text-[hsl(var(--accent))] group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <h3 className="font-semibold text-sm mb-1 group-hover:text-[hsl(var(--accent))] transition-colors">{item.label}</h3>
+              <p className="text-xs text-[hsl(var(--fg-muted))] leading-snug">{item.description}</p>
+            </Link>
+          ))}
+          <div className="card p-5 border-dashed opacity-50">
+            <div className="w-9 h-9 rounded-lg bg-[hsl(var(--bg-muted))] flex items-center justify-center mb-3 border border-[hsl(var(--border))]">
+              <Icons.Lock size={16} className="text-[hsl(var(--fg-muted))]" />
+            </div>
+            <h3 className="font-semibold text-sm mb-1">Private Spaces</h3>
+            <p className="text-xs text-[hsl(var(--fg-muted))] leading-snug">Notes · Archive · Family — owner access only</p>
+          </div>
         </div>
       </section>
 
