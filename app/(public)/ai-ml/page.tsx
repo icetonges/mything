@@ -1,14 +1,14 @@
 import { LINKS } from "@/lib/constants";
 import { 
-  Brain, ExternalLink, Code, BookOpen, Lightbulb, TrendingUp, Award, 
-  GitBranch, Check, X, Zap, Terminal, FileText
+  Brain, ExternalLink, Code, BookOpen, Lightbulb, GitBranch, Check, X, Zap, Terminal, FileText
 } from "lucide-react";
 import AIChatWidget from "@/components/ai/AIChatWidget";
 
 export const revalidate = 3600;
 
-// ML Algorithms Data (using String.raw to avoid template literal issues)
-const LINEAR_REGRESSION_CODE = String.raw`# DoD Budget Forecasting Example
+export default function AIMLPage() {
+  // Code examples stored as plain strings (no template literals with $)
+  const linearCode = `# DoD Budget Forecasting Example
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -28,10 +28,10 @@ model.fit(X_train, y_train)
 # Evaluate
 from sklearn.metrics import r2_score, mean_absolute_error
 y_pred = model.predict(X_test)
-print(f"R² Score: {r2_score(y_test, y_pred):.3f}")
-print(f"MAE: ${mean_absolute_error(y_test, y_pred):,.0f}")`;
+print("R² Score:", r2_score(y_test, y_pred))
+print("MAE:", mean_absolute_error(y_test, y_pred))`;
 
-const LOGISTIC_CODE = String.raw`# FIAR Audit Risk Prediction
+  const logisticCode = `# FIAR Audit Risk Prediction
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
@@ -39,7 +39,7 @@ from sklearn.preprocessing import StandardScaler
 X = df[['control_deficiencies', 'prior_findings', 'complexity_score']]
 y = df['audit_failure']  # 1 = failed, 0 = passed
 
-# Scale features (important!)
+# Scale features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -47,18 +47,18 @@ X_scaled = scaler.fit_transform(X)
 model = LogisticRegression(C=0.1, penalty='l2')
 model.fit(X_scaled, y)
 
-# Predictions with probability
+# Predictions
 probs = model.predict_proba(X_test)[:, 1]
 preds = model.predict(X_test)`;
 
-const RANDOM_FOREST_CODE = String.raw`# Federal Contract Classification
+  const randomForestCode = `# Federal Contract Classification
 from sklearn.ensemble import RandomForestClassifier
 
-# Features: agency, NAICS, amount, set-aside type
+# Features
 X = pd.get_dummies(df[['agency', 'naics_code', 'amount']])
-y = df['award_type']  # 0 = competitive, 1 = sole-source
+y = df['award_type']
 
-# Train with 100 trees
+# Train
 rf = RandomForestClassifier(n_estimators=100, max_depth=10)
 rf.fit(X_train, y_train)
 
@@ -68,13 +68,16 @@ importances = pd.DataFrame({
     'importance': rf.feature_importances_
 }).sort_values('importance', ascending=False)`;
 
-const AGENT_CODE = String.raw`import { GoogleGenerativeAI } from '@google/genai';
+  const agentCode = `import { GoogleGenerativeAI } from '@google/genai';
 
 // 1. Define Tools
 const tools = [{
   name: "search_database",
   description: "Search DoD budget database",
-  parameters: { type: "object", properties: { account: { type: "string" }}}
+  parameters: { 
+    type: "object", 
+    properties: { account: { type: "string" }}
+  }
 }];
 
 // 2. System Prompt
@@ -92,52 +95,20 @@ async function runAgent(userMessage: string) {
   const chat = model.startChat();
   let response = await chat.sendMessage({ message: userMessage });
 
-  // Loop: if agent calls tool, execute and continue
+  // Loop while agent calls tools
   while (response.functionCalls?.length > 0) {
     const results = [];
     for (const fc of response.functionCalls) {
       const result = await executeFunction(fc.name, fc.args);
-      results.push({ functionResponse: { name: fc.name, response: result }});
+      results.push({ 
+        functionResponse: { name: fc.name, response: result }
+      });
     }
     response = await chat.sendMessage({ message: results });
   }
   return response.text;
 }`;
 
-const KAGGLE_WHITEPAPERS = [
-  {
-    title: "Introduction to Agents",
-    url: "https://www.kaggle.com/whitepaper-introduction-to-agents",
-    summary: "Foundational concepts: what agents are, how they work, and why they matter.",
-    topics: ["Agent definition", "ReAct pattern", "Agent loops"]
-  },
-  {
-    title: "Agent Tools & MCP",
-    url: "https://www.kaggle.com/whitepaper-agent-tools-and-interoperability-with-mcp",
-    summary: "Tool use and Model Context Protocol for system interoperability.",
-    topics: ["Function calling", "MCP protocol", "Tool design"]
-  },
-  {
-    title: "Context Engineering & Memory",
-    url: "https://www.kaggle.com/whitepaper-context-engineering-sessions-and-memory",
-    summary: "Managing context windows, conversation history, and agent memory.",
-    topics: ["Context management", "Session handling", "State persistence"]
-  },
-  {
-    title: "Agent Quality",
-    url: "https://www.kaggle.com/whitepaper-agent-quality",
-    summary: "Testing, evaluating, and improving agent performance.",
-    topics: ["Evaluation metrics", "Testing strategies", "Quality assurance"]
-  },
-  {
-    title: "Prototype to Production",
-    url: "https://www.kaggle.com/whitepaper-prototype-to-production",
-    summary: "Taking agents from experimentation to production deployment.",
-    topics: ["Production deployment", "Scaling", "Monitoring"]
-  }
-];
-
-export default function AIMLPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[hsl(var(--bg))] to-[hsl(var(--bg-muted))]">
       {/* Hero */}
@@ -162,11 +133,11 @@ export default function AIMLPage() {
               ML Algorithms <BookOpen size={16} />
             </a>
             <a href="#ai-agents" className="flex items-center gap-2 px-5 py-3 rounded-xl border border-purple-500/30 bg-purple-500/10 font-semibold text-sm hover:border-purple-500/50 transition-all">
-              AI Agents Guide <GitBranch size={16} />
+              AI Agents <GitBranch size={16} />
             </a>
             <a href={LINKS.kaggle} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-3 rounded-xl border border-[hsl(var(--border))] font-semibold text-sm hover:border-[hsl(var(--accent)/0.4)] transition-all">
-              My Kaggle <ExternalLink size={14} />
+              Kaggle <ExternalLink size={14} />
             </a>
           </div>
         </div>
@@ -183,7 +154,7 @@ export default function AIMLPage() {
             </div>
             <div>
               <h2 className="font-display text-3xl font-bold">Machine Learning Algorithms</h2>
-              <p className="text-sm text-[hsl(var(--fg-muted))]">Core algorithms with real DoD/federal use cases</p>
+              <p className="text-sm text-[hsl(var(--fg-muted))]">Core algorithms with DoD/federal use cases</p>
             </div>
           </div>
 
@@ -200,7 +171,7 @@ export default function AIMLPage() {
                     </span>
                   </div>
                   <p className="text-sm text-[hsl(var(--fg-muted))]">
-                    Predicts continuous values by fitting a straight line through data points. Foundation of many ML techniques.
+                    Predicts continuous values by fitting a straight line through data points.
                   </p>
                 </div>
               </div>
@@ -224,7 +195,7 @@ export default function AIMLPage() {
                     </h4>
                     <ul className="space-y-1 text-xs text-[hsl(var(--fg-muted))]">
                       <li>• Simple and interpretable</li>
-                      <li>• Fast to train</li>
+                      <li>• Fast to train and predict</li>
                       <li>• Shows feature importance</li>
                     </ul>
                   </div>
@@ -245,7 +216,7 @@ export default function AIMLPage() {
                   <span className="text-xs font-mono text-[hsl(var(--fg-muted))]">python</span>
                   <Terminal size={12} className="text-[hsl(var(--fg-muted))]" />
                 </div>
-                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed">{LINEAR_REGRESSION_CODE}</pre>
+                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">{linearCode}</pre>
               </div>
             </div>
 
@@ -257,11 +228,11 @@ export default function AIMLPage() {
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-display text-2xl font-bold">Logistic Regression</h3>
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">
-                      Supervised - Classification
+                      Classification
                     </span>
                   </div>
                   <p className="text-sm text-[hsl(var(--fg-muted))]">
-                    Predicts probability of binary outcomes (yes/no, 0/1). Despite the name, it's for classification.
+                    Predicts probability of binary outcomes. Despite the name, it's for classification.
                   </p>
                 </div>
               </div>
@@ -272,7 +243,7 @@ export default function AIMLPage() {
                     <Lightbulb size={16} />Use Cases
                   </h4>
                   <ul className="space-y-2 text-xs text-[hsl(var(--fg-muted))]">
-                    <li>• FIAR audit pass/fail prediction</li>
+                    <li>• FIAR audit risk prediction</li>
                     <li>• Contract award classification</li>
                     <li>• Employee turnover prediction</li>
                   </ul>
@@ -304,7 +275,7 @@ export default function AIMLPage() {
                 <div className="px-4 py-2 border-b border-[hsl(var(--border))]">
                   <span className="text-xs font-mono text-[hsl(var(--fg-muted))]">python</span>
                 </div>
-                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed">{LOGISTIC_CODE}</pre>
+                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">{logisticCode}</pre>
               </div>
             </div>
 
@@ -316,11 +287,11 @@ export default function AIMLPage() {
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-display text-2xl font-bold">Random Forest</h3>
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300">
-                      Supervised - Ensemble
+                      Ensemble
                     </span>
                   </div>
                   <p className="text-sm text-[hsl(var(--fg-muted))]">
-                    Ensemble of decision trees where each tree votes. Handles non-linear relationships naturally.
+                    Ensemble of decision trees. Handles non-linear relationships naturally.
                   </p>
                 </div>
               </div>
@@ -333,7 +304,7 @@ export default function AIMLPage() {
                   <ul className="space-y-2 text-xs text-[hsl(var(--fg-muted))]">
                     <li>• Federal contract classification</li>
                     <li>• Budget risk assessment</li>
-                    <li>• Tabular data with complex patterns</li>
+                    <li>• Complex tabular data</li>
                   </ul>
                 </div>
 
@@ -343,8 +314,8 @@ export default function AIMLPage() {
                       <Check size={16} />Advantages
                     </h4>
                     <ul className="space-y-1 text-xs text-[hsl(var(--fg-muted))]">
-                      <li>• Handles non-linear relationships</li>
-                      <li>• Provides feature importance</li>
+                      <li>• Handles non-linear patterns</li>
+                      <li>• Feature importance built-in</li>
                       <li>• Robust to outliers</li>
                     </ul>
                   </div>
@@ -364,7 +335,7 @@ export default function AIMLPage() {
                 <div className="px-4 py-2 border-b border-[hsl(var(--border))]">
                   <span className="text-xs font-mono text-[hsl(var(--fg-muted))]">python</span>
                 </div>
-                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed">{RANDOM_FOREST_CODE}</pre>
+                <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">{randomForestCode}</pre>
               </div>
             </div>
           </div>
@@ -377,16 +348,15 @@ export default function AIMLPage() {
               <GitBranch size={20} className="text-green-400" />
             </div>
             <div>
-              <h2 className="font-display text-3xl font-bold">AI Agents: From Concept to Production</h2>
+              <h2 className="font-display text-3xl font-bold">AI Agents: Concept to Production</h2>
               <p className="text-sm text-[hsl(var(--fg-muted))]">Based on Kaggle AI Agents Intensive</p>
             </div>
           </div>
 
-          {/* Quick Implementation */}
           <div className="card p-6 mb-8 border-green-500/20 bg-green-500/5">
             <h3 className="font-display text-xl font-bold mb-4 flex items-center gap-2">
               <Zap size={20} className="text-green-400" />
-              Quick Implementation Guide
+              Quick Implementation
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -394,21 +364,21 @@ export default function AIMLPage() {
                 <div className="text-2xl mb-2">1️⃣</div>
                 <h4 className="font-semibold text-sm mb-2">Define Tools</h4>
                 <p className="text-xs text-[hsl(var(--fg-muted))]">
-                  Create functions the agent can call: search databases, fetch data, etc.
+                  Functions the agent can call
                 </p>
               </div>
               <div className="p-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg))]">
                 <div className="text-2xl mb-2">2️⃣</div>
                 <h4 className="font-semibold text-sm mb-2">System Prompt</h4>
                 <p className="text-xs text-[hsl(var(--fg-muted))]">
-                  Give agent context: who it is, what it knows, when to use tools.
+                  Agent context and personality
                 </p>
               </div>
               <div className="p-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg))]">
                 <div className="text-2xl mb-2">3️⃣</div>
                 <h4 className="font-semibold text-sm mb-2">Agentic Loop</h4>
                 <p className="text-xs text-[hsl(var(--fg-muted))]">
-                  Let agent decide: call tool → get result → reason → repeat or answer.
+                  Tool → Result → Reason → Repeat
                 </p>
               </div>
             </div>
@@ -417,41 +387,56 @@ export default function AIMLPage() {
               <div className="px-4 py-2 border-b border-[hsl(var(--border))]">
                 <span className="text-xs font-mono text-[hsl(var(--fg-muted))]">typescript</span>
               </div>
-              <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">{AGENT_CODE}</pre>
+              <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">{agentCode}</pre>
             </div>
           </div>
 
           {/* Kaggle Whitepapers */}
           <h3 className="font-display text-xl font-bold mb-4 flex items-center gap-2">
             <FileText size={20} className="text-blue-400" />
-            Kaggle AI Agents Whitepapers
+            Kaggle Whitepapers
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {KAGGLE_WHITEPAPERS.map((paper, idx) => (
-              <a 
-                key={idx}
-                href={paper.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="font-semibold text-sm group-hover:text-blue-400 transition-colors">
-                    {paper.title}
-                  </h4>
-                  <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
-                </div>
-                <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">{paper.summary}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {paper.topics.map((topic, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded-full bg-blue-500/10 text-[10px] text-blue-300">
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              </a>
-            ))}
+            <a href="https://www.kaggle.com/whitepaper-introduction-to-agents" target="_blank" rel="noopener noreferrer" className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="font-semibold text-sm group-hover:text-blue-400">Introduction to Agents</h4>
+                <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
+              </div>
+              <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">Foundational concepts: what agents are and how they work</p>
+            </a>
+
+            <a href="https://www.kaggle.com/whitepaper-agent-tools-and-interoperability-with-mcp" target="_blank" rel="noopener noreferrer" className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="font-semibold text-sm group-hover:text-blue-400">Agent Tools & MCP</h4>
+                <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
+              </div>
+              <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">Tool use and Model Context Protocol</p>
+            </a>
+
+            <a href="https://www.kaggle.com/whitepaper-context-engineering-sessions-and-memory" target="_blank" rel="noopener noreferrer" className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="font-semibold text-sm group-hover:text-blue-400">Context & Memory</h4>
+                <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
+              </div>
+              <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">Managing context windows and agent memory</p>
+            </a>
+
+            <a href="https://www.kaggle.com/whitepaper-agent-quality" target="_blank" rel="noopener noreferrer" className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="font-semibold text-sm group-hover:text-blue-400">Agent Quality</h4>
+                <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
+              </div>
+              <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">Testing and improving agent performance</p>
+            </a>
+
+            <a href="https://www.kaggle.com/whitepaper-prototype-to-production" target="_blank" rel="noopener noreferrer" className="card p-5 border-blue-500/20 hover:border-blue-500/40 transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="font-semibold text-sm group-hover:text-blue-400">Prototype to Production</h4>
+                <ExternalLink size={14} className="text-[hsl(var(--fg-muted))] group-hover:text-blue-400 shrink-0 ml-2" />
+              </div>
+              <p className="text-xs text-[hsl(var(--fg-muted))] mb-3">Production deployment and scaling</p>
+            </a>
           </div>
         </section>
 
@@ -459,8 +444,8 @@ export default function AIMLPage() {
         <div className="card p-8 border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-blue-500/10 text-center">
           <Brain size={40} className="text-purple-400 mx-auto mb-4" />
           <h3 className="font-display text-2xl font-bold mb-3">Ask My AI Agent</h3>
-          <p className="text-sm text-[hsl(var(--fg-muted))] mb-6 max-w-2xl mx-auto">
-            Use the chat widget to ask questions about ML algorithms, AI agents, or federal finance applications.
+          <p className="text-sm text-[hsl(var(--fg-muted))] max-w-2xl mx-auto">
+            Use the chat widget to ask about ML algorithms, AI agents, or federal finance applications.
           </p>
         </div>
       </div>
