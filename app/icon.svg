@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="512" height="512" fill="#0A0A0A" rx="80"/>
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <radialGradient id="goldGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5C518;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DAA520;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Glow effect -->
+    <filter id="goldGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Star ✦ symbol -->
+  <g transform="translate(256, 256)" filter="url(#goldGlow)">
+    <!-- Main star body -->
+    <path d="M 0,-120 L 15,-30 L 105,-15 L 30,0 L 15,90 L 0,120 L -15,90 L -30,0 L -105,-15 L -15,-30 Z" 
+          fill="url(#goldGradient)" 
+          stroke="#FFD700" 
+          stroke-width="3"/>
+    
+    <!-- Center diamond highlight -->
+    <circle cx="0" cy="0" r="25" fill="#FFD700" opacity="0.9"/>
+    
+    <!-- Inner star points -->
+    <circle cx="0" cy="-60" r="8" fill="#FFD700"/>
+    <circle cx="52" cy="-8" r="8" fill="#FFD700"/>
+    <circle cx="0" cy="60" r="8" fill="#FFD700"/>
+    <circle cx="-52" cy="-8" r="8" fill="#FFD700"/>
+    
+    <!-- Sparkle accents -->
+    <circle cx="80" cy="-80" r="4" fill="#FFD700" opacity="0.8"/>
+    <circle cx="80" cy="80" r="4" fill="#FFD700" opacity="0.8"/>
+    <circle cx="-80" cy="-80" r="4" fill="#FFD700" opacity="0.8"/>
+    <circle cx="-80" cy="80" r="4" fill="#FFD700" opacity="0.8"/>
+  </g>
+</svg>
