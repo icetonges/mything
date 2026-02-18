@@ -8,14 +8,52 @@ interface DashboardProps {
 }
 
 const TIMELINE = [
-  { year: '2026', title: 'AI-Powered Full-Stack Dev',   desc: 'Built 2 production apps (6,300+ lines) in 24 hrs — MyThing platform & interactive resume', highlight: true },
-  { year: '2025', title: 'Google AI Agents Intensive',  desc: 'Completed advanced AI agents course — agentic workflows, tool calling, prompt engineering' },
-  { year: '2025', title: 'Master of Data Science',      desc: "Saint Peter's University — Capstone: Predictive analytics for federal budget forecasting" },
-  { year: '2024', title: 'Pentagon GS-15 Manager',      desc: 'Managing $338B DoD budget portfolio — strategic planning, execution, audit readiness' },
-  { year: '2022', title: 'M.S. Cybersecurity',          desc: 'University of Maryland — Federal systems security, risk management, FISMA compliance' },
-  { year: '2020', title: 'M.S. Cyber Forensics',        desc: 'UMGC — Digital forensics, incident response, malware analysis' },
-  { year: '2010', title: 'DoD Inspector General',       desc: 'Financial analyst — audited DoD programs, identified $50M+ in cost savings' },
-  { year: '2008', title: 'U.S. Army Veteran',           desc: 'Served honorably — logistics, operations, leadership' },
+  { 
+    year: '2026', 
+    title: 'Latest - Full-Stack Dev, AI, ML (3 Apps)', 
+    desc: 'Built 2 production apps (6,300+ lines) in 24 hrs — MyThing platform & interactive resume, and completed the third production app on AI ML knowledge hub – ML & AI thing', 
+    highlight: true 
+  },
+  { 
+    year: '2025', 
+    title: 'Google AI Agents Intensive', 
+    desc: 'Completed advanced AI agents course — agentic workflows, tool calling, prompt engineering' 
+  },
+  { 
+    year: '2025', 
+    title: 'Master of Data Science', 
+    desc: "Saint Peter's University — Capstone: Predictive analytics for federal budget forecasting" 
+  },
+  { 
+    year: '2024', 
+    title: 'IBM Data Science Certificates', 
+    desc: 'Real-world business problem-solving — Python, SQL, machine learning, data visualization, and applied analytics for real-world business problem-solving' 
+  },
+  { 
+    year: '2023', 
+    title: 'M.S. Cyber Forensics', 
+    desc: 'UMGC — Digital forensics, incident response, malware analysis' 
+  },
+  { 
+    year: '2022', 
+    title: 'M.S. Cybersecurity', 
+    desc: 'UMGC Honor Graduate — Federal systems security, risk management, FISMA compliance' 
+  },
+  { 
+    year: '2020', 
+    title: 'Pentagon GS-15 Manager', 
+    desc: 'Managing $338B DoD budget portfolio — data, IT, strategic planning, execution, audit readiness' 
+  },
+  { 
+    year: '2017', 
+    title: 'DoD Inspector General', 
+    desc: 'Financial system analyst — system and budget PPBE, identified $50M+ in cost savings' 
+  },
+  { 
+    year: '2010', 
+    title: 'U.S. Army Veteran', 
+    desc: 'Served honorably — logistics, operations, leadership' 
+  },
 ];
 
 const SKILLS = [
@@ -29,7 +67,7 @@ const SKILLS = [
 const ACHIEVEMENTS = [
   { icon: '💰', title: '$338B Portfolio',      desc: 'DoD budget execution, strategic planning & Congressional justifications at the Pentagon' },
   { icon: '⚡', title: '24-Hour Build Sprint', desc: '2 production full-stack apps · 6,300 lines · AI-powered at zero cost' },
-  { icon: '🎓', title: '5 Advanced Degrees',   desc: 'Data Science · Cybersecurity (2×) · Cyber Forensics · MBA' },
+  { icon: '🎓', title: '5 Advanced Degrees',   desc: 'Data Science · Cybersecurity · Cyber Forensics · MBA · Accounting' },
   { icon: '🏅', title: '15+ Yrs Federal',      desc: 'Pentagon · DoD OIG · U.S. Army — mission-critical leadership' },
 ];
 
