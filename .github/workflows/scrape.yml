@@ -18,7 +18,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install feedparser requests google-generativeai python-dateutil
+        run: pip install -r scripts/requirements.txt
 
       - name: Run scraper
         run: python scripts/scrape_tech_news.py

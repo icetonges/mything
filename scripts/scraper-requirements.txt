@@ -1,0 +1,6 @@
+# Python dependencies for Tech News Scraper
+feedparser>=6.0.10
+requests>=2.31.0
+google-generativeai>=0.3.0
+python-dateutil>=2.8.2
+beautifulsoup4>=4.12.0
