@@ -150,29 +150,6 @@ export default function PortfolioDashboard({ stats, articles = [] }: DashboardPr
         </div>
       </div>
 
-      {/* ── ROW 4: Mini Tech Pulse (3 latest articles) ────── */}
-      {articles.length > 0 && (
-        <div className="card p-5">
-          <h3 className="font-display text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-widest text-[hsl(var(--accent))]">
-            <TrendingUp size={14} /> Latest Tech Pulse
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {articles.slice(0, 3).map(a => (
-              <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer"
-                className="flex flex-col gap-1.5 p-3 rounded-lg bg-[hsl(var(--bg-muted))] border border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/0.3)] transition-all group">
-                <p className="text-xs font-medium line-clamp-2 group-hover:text-[hsl(var(--accent))] transition-colors leading-snug">{a.title}</p>
-                <div className="flex items-center gap-1.5 text-[10px] text-[hsl(var(--fg-muted))] mt-auto">
-                  <span className="px-1.5 py-0.5 rounded bg-[hsl(var(--bg-card))] border border-[hsl(var(--border))]">{a.source}</span>
-                  <span>·</span>
-                  <span>{new Date(a.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                  <ExternalLink size={10} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

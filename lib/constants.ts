@@ -10,7 +10,7 @@ export const LINKS = {
 export const OWNER = {
   name:      'Xiaobing (Peter) Shang',
   shortName: 'Peter Shang',
-  title:     'AI Enabler · Federal Financial Manager · Data Scientist',
+  title:     'Digital Transformer · Federal Financial Manager · Data Scientist · Agentic AI Specialist',
   tagline:   'Building intelligent systems at the intersection of federal finance, AI, and full-stack engineering.',
   location:  'Washington, D.C. Metro Area',
   email:     'icetonges@gmail.com',
