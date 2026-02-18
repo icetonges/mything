@@ -101,6 +101,18 @@ export const PROJECTS: Project[] = [
     year: 2024,
   },
   {
+    id: 'ibm-data-science',
+    title: 'IBM Data Science Professional Certificate',
+    description: 'End-to-end data science pipeline including data wrangling, EDA, machine learning, and visualization. Applied to federal financial dataset analysis.',
+    category: 'data-science',
+    tech: ['Python', 'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Jupyter'],
+    links: [
+      { label: 'Kaggle Profile', url: 'https://www.kaggle.com/icetonges' },
+    ],
+    featured: false,
+    year: 2024,
+  },
+  {
     id: 'fiar-dashboard',
     title: 'FIAR Audit Readiness Dashboard',
     description: 'Real-time dashboard tracking Financial Improvement and Audit Readiness (FIAR) metrics, control deficiencies, and corrective action plans for DoD financial statements.',
