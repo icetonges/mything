@@ -180,10 +180,10 @@ vercel
 
 ## 📝 Documentation
 
-- **[Complete Platform Documentation](.docs/MYTHING-PLATFORM-DOCUMENTATION.md)** - Full guide
-- **[Deployment Guide](.docs/MYTHING-PLATFORM-DOCUMENTATION.md#-deployment-guide)** - Step-by-step
-- **[Maintenance Guide](.docs/MYTHING-PLATFORM-DOCUMENTATION.md#-maintenance-guide)** - Operations
-- **[Troubleshooting](.docs/MYTHING-PLATFORM-DOCUMENTATION.md#troubleshooting)** - Common issues
+- **[Complete Platform Documentation](docs/MYTHING-PLATFORM-DOCUMENTATION.md)** - Full guide
+- **[Deployment Guide](docs/MYTHING-PLATFORM-DOCUMENTATION.md#-deployment-guide)** - Step-by-step
+- **[Maintenance Guide](docs/MYTHING-PLATFORM-DOCUMENTATION.md#-maintenance-guide)** - Operations
+- **[Troubleshooting](docs/MYTHING-PLATFORM-DOCUMENTATION.md#troubleshooting)** - Common issues
 
 ---
 
