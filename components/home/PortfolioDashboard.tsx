@@ -10,7 +10,7 @@ interface DashboardProps {
 const TIMELINE = [
   { 
     year: '2026', 
-    title: 'Latest - Full-Stack Dev, AI, ML (3 Apps)', 
+    title: 'Full-Stack Dev, AI, ML (3 Apps)', 
     desc: 'Built 2 production apps (6,300+ lines) in 24 hrs — MyThing platform & interactive resume, and completed the third production app on AI ML knowledge hub – ML & AI thing', 
     highlight: true 
   },
