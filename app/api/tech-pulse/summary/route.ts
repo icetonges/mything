@@ -59,11 +59,20 @@ export async function GET() {
       return `${cat}:\n${items}`;
     }).join("\n\n");
 
+    // Build AI/ML specific articles for dedicated highlight
+    const aiMlArticles = articles.filter(a => a.category === "AI/ML").slice(0, 10);
+    const aiMlSnippets = aiMlArticles
+      .map(a => `${a.title}: ${a.summary?.substring(0, 100) ?? ""}`)
+      .join("\n");
+
     const prompt = `You are a senior technology and federal government analyst.
 Analyze these recent tech/government news articles and return ONLY valid JSON (no markdown, no explanation).
 
 Articles for executive summary:
 ${articleSnippets}
+
+AI/ML articles for dedicated highlight:
+${aiMlSnippets}
 
 Articles by category for highlights:
 ${catSections}
@@ -71,6 +80,7 @@ ${catSections}
 Return exactly this JSON structure:
 {
   "executiveSummary": "3 sentences. Professional tone. Mention specific technologies, agencies, or dollar amounts.",
+  "aiMlHighlight": "2-3 sentences focused ONLY on LLM tools, AI agents, and ML updates. Mention specific models (GPT, Claude, Gemini, Llama, etc.) and capabilities. Be specific about what's new.",
   "categoryHighlights": {
 ${activeCats.map(c => `    "${c}": "One sentence, max 20 words, most important development"`).join(",\n")}
   }
@@ -94,7 +104,7 @@ Return ONLY the JSON object, no other text.`;
 
     // Parse — strip any accidental markdown fences
     const cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-    let parsed: { executiveSummary: string; categoryHighlights: Record<string, string> };
+    let parsed: { executiveSummary: string; aiMlHighlight?: string; categoryHighlights: Record<string, string> };
 
     try {
       parsed = JSON.parse(cleaned);
@@ -114,6 +124,7 @@ Return ONLY the JSON object, no other text.`;
 
     return NextResponse.json({
       executiveSummary:   parsed.executiveSummary ?? null,
+      aiMlHighlight:      parsed.aiMlHighlight ?? null,
       categoryHighlights: parsed.categoryHighlights ?? {},
       categoryCounts,
       generatedAt:        new Date().toISOString(),

@@ -14,6 +14,7 @@ interface Article {
 
 interface SummaryData {
   executiveSummary: string | null;
+  aiMlHighlight: string | null;
   categoryHighlights: Record<string, string>;
   categoryCounts: Record<string, number>;
   generatedAt: string;
@@ -26,7 +27,7 @@ interface Props {
 
 const ALL_CATEGORIES = [
   'All', 'AI/ML', 'Cloud', 'Cybersecurity', 'Web Dev',
-  'Federal Tech', 'DoD Audit', 'DoD Budget', 'DoD Policy',
+  'Federal Tech', 'DoD Audit', 'DoD Budget', 'DoD Update',
 ];
 
 const CAT_COLORS: Record<string, string> = {
@@ -37,13 +38,13 @@ const CAT_COLORS: Record<string, string> = {
   'Federal Tech': 'bg-green-500/10 text-green-400 border-green-500/20',
   'DoD Audit':    'bg-orange-500/10 text-orange-400 border-orange-500/20',
   'DoD Budget':   'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  'DoD Policy':   'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  'DoD Update':   'bg-teal-500/10 text-teal-400 border-teal-500/20',
 };
 
 const CAT_EMOJIS: Record<string, string> = {
   'AI/ML': '🤖', 'Cloud': '☁️', 'Cybersecurity': '🔒',
   'Web Dev': '💻', 'Federal Tech': '🏛️',
-  'DoD Audit': '📋', 'DoD Budget': '💰', 'DoD Policy': '📜',
+  'DoD Audit': '📋', 'DoD Budget': '💰', 'DoD Update': '🔄',
 };
 
 function timeAgo(date: string | Date) {
@@ -136,6 +137,19 @@ export default function TechPulsePanel({ articles }: Props) {
           <p className="text-sm text-[hsl(var(--fg))] leading-relaxed">{execSummary}</p>
         )}
       </div>
+
+      {/* ── AI/ML Highlight (LLMs, Agents, ML) ───────────────── */}
+      {summary?.aiMlHighlight && (
+        <div className="mx-5 mb-4 rounded-xl border border-purple-500/20 bg-purple-500/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Brain size={13} className="text-purple-400" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+              AI/ML Focus: LLMs, Agents & Tools
+            </span>
+          </div>
+          <p className="text-sm text-[hsl(var(--fg))] leading-relaxed">{summary.aiMlHighlight}</p>
+        </div>
+      )}
 
       {/* ── Category Tabs ────────────────────────────────────── */}
       <div className="px-5 mb-4">

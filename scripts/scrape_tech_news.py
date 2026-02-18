@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-MyThing Tech News Scraper
+MyThing Tech News Scraper - Enhanced February 2026
 Fetches RSS feeds, generates AI summaries, pushes to shangthing.vercel.app
 
+ENHANCED: Premium AI/ML sources (LLM, Agentic AI, Applied AI)
+ENHANCED: Premium DoD sources (DefenseScoop, C4ISRNET, DoD IG)
+KEPT: All existing categories
+
 Usage:
-  pip install feedparser requests google-generativeai python-dateutil
+  pip install feedparser requests google-generativeai python-dateutil beautifulsoup4
   python scripts/scrape_tech_news.py
 
 Environment variables:
@@ -14,6 +18,7 @@ Environment variables:
 """
 import feedparser
 import requests
+from bs4 import BeautifulSoup
 import google.generativeai as genai
 import os
 import json
@@ -33,58 +38,80 @@ SITE_URL       = os.environ.get("SITE_URL", "https://shangthing.vercel.app")
 INGEST_URL     = f"{SITE_URL}/api/tech-trends/ingest"
 
 RSS_FEEDS = {
-    # ── Existing feeds ────────────────────────────────────
+    # ── ENHANCED: AI/ML (Latest trends, LLMs, Agentic AI) ─────────────────────
     "AI/ML": [
+        # ✅ BEST: Hugging Face (LLM models, tools, applied AI)
+        "https://huggingface.co/blog/feed.xml",
+        # ✅ NEW: The Batch by DeepLearning.AI (Andrew Ng's newsletter)
+        "https://www.deeplearning.ai/the-batch/feed/",
+        # ✅ NEW: OpenAI Blog (GPT, ChatGPT, latest releases)
+        "https://openai.com/blog/rss/",
+        # ✅ NEW: Anthropic News (Claude updates, research)
+        "https://www.anthropic.com/news/rss",
+        # ✅ NEW: Google AI Blog (Gemini, PaLM, latest research)
+        "https://blog.google/technology/ai/rss/",
+        # Existing: arXiv AI (academic papers)
         "https://arxiv.org/rss/cs.AI",
+        # Existing: arXiv ML (academic papers)
         "https://arxiv.org/rss/cs.LG",
     ],
+    
+    # ── EXISTING: Web Dev (unchanged) ─────────────────────────────────────────
     "Web Dev": [
         "https://hnrss.org/frontpage",
     ],
+    
+    # ── EXISTING: Cybersecurity (unchanged) ───────────────────────────────────
     "Cybersecurity": [
         "https://feeds.feedburner.com/TheHackersNews",
         "https://www.schneier.com/feed/atom/",
     ],
+    
+    # ── EXISTING: Federal Tech ────────────────────────────────────────────────
     "Federal Tech": [
         "https://fedscoop.com/feed/",
-        "https://gcn.com/rss-feeds/all.aspx",
         "https://defensescoop.com/feed/",
     ],
+    
+    # ── EXISTING: Cloud (unchanged) ───────────────────────────────────────────
     "Cloud": [
         "https://aws.amazon.com/blogs/aws/feed/",
     ],
 
-    # ── NEW: DoD Audit, Budget & Policy feeds ─────────────
+    # ── ENHANCED: DoD Audit ───────────────────────────────────────────────────
     "DoD Audit": [
-        # DoD OIG — press releases and reports
-        "https://www.dodig.mil/rss/rss-press-releases.xml",
-        # GAO — recent reports (many cover DoD)
+        # ✅ BEST: DoD IG official RSS
+        "https://www.dodig.mil/rss.xml",
+        # ✅ BEST: GAO reports (many cover DoD audits)
         "https://www.gao.gov/rss/reports.xml",
-        # POGO — Project on Government Oversight (DoD watchdog)
+        # Existing: POGO watchdog
         "https://www.pogo.org/feed",
     ],
+    
+    # ── ENHANCED: DoD Budget ──────────────────────────────────────────────────
     "DoD Budget": [
-        # Office of the Under Secretary of Defense (Comptroller) — news
+        # Existing: DoD Comptroller official
         "https://comptroller.defense.gov/Portals/45/Comptroller_RSS.xml",
-        # Defense News — budget & finance coverage
-        "https://www.defensenews.com/arc/outboundfeeds/rss/category/pentagon/?outputType=xml",
-        # Federal News Network — federal budget and finance
+        # ✅ NEW: Defense One (better budget coverage)
+        "https://www.defenseone.com/rss/all/",
+        # Existing: Federal News Network budget
         "https://federalnewsnetwork.com/category/budget-and-finance/feed/",
-        # OMB — White House budget releases
-        "https://www.whitehouse.gov/omb/feed/",
     ],
-    "DoD Policy": [
-        # Defense.gov — official DoD news
-        "https://www.defense.gov/DesktopModules/ArticleCS/RSS.ashx?ContentType=1&Site=945&max=10",
-        # Breaking Defense — DoD initiatives and memos
+    
+    # ── ENHANCED: DoD Update (IT & AI focus) ──────────────────────────────────
+    "DoD Update": [
+        # ✅ NEW: DefenseScoop (#1 for DoD AI/IT news)
+        "https://defensescoop.com/feed/",
+        # ✅ NEW: C4ISRNET (best tech detail)
+        "https://www.c4isrnet.com/arc/outboundfeeds/rss/?outputType=xml",
+        # Existing: Breaking Defense
         "https://breakingdefense.com/feed/",
-        # InsideDefense (public headlines)
-        "https://insidedefense.com/rss.xml",
     ],
 }
 
-MAX_ARTICLES_PER_FEED = 5
-RATE_LIMIT_SECONDS    = 1.2   # slightly longer to avoid API rate limits
+# Limit articles per feed (2 per source = optimal volume)
+MAX_ARTICLES_PER_FEED = 2
+RATE_LIMIT_SECONDS    = 1.5   # Be respectful to servers
 
 # ─── AI SUMMARY ───────────────────────────────────────────────────────────────
 def summarize(title: str, description: str, category: str) -> str:
@@ -94,10 +121,19 @@ def summarize(title: str, description: str, category: str) -> str:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel("gemini-1.5-flash")
 
+        # Tailored prompt for AI/ML content
+        if category == "AI/ML":
+            prompt = f"""Summarize this AI/ML article in exactly 2 clear sentences.
+Focus on: what model/tool/technique was released, what it does, and key capabilities.
+Highlight if it involves LLMs, Agentic AI, applied AI, or emerging techniques.
+Title: {title}
+Description: {description[:1000]}
+Return only the 2-sentence summary, nothing else."""
         # Tailored prompt for DoD/federal content
-        if "DoD" in category:
+        elif "DoD" in category:
             prompt = f"""Summarize this DoD/federal government article in exactly 2 clear sentences.
 Focus on: what action was taken, which program/budget is affected, and dollar amounts if mentioned.
+Include 2026 context like "Golden Dome", "DOGE Impact", or "Agentic AI" if relevant.
 Title: {title}
 Description: {description[:1000]}
 Return only the 2-sentence summary, nothing else."""
@@ -118,7 +154,7 @@ def fetch_articles(category: str, feed_url: str) -> list[dict]:
     articles = []
     try:
         log.info(f"Fetching [{category}] {feed_url}")
-        feed = feedparser.parse(feed_url, request_headers={"User-Agent": "MyThing-Scraper/1.0"})
+        feed = feedparser.parse(feed_url, request_headers={"User-Agent": "MyThing-Scraper/2.0 (https://shangthing.vercel.app)"})
 
         if not feed.entries:
             log.warning(f"  No entries found for {feed_url}")
@@ -195,25 +231,39 @@ def push_to_site(articles: list[dict]) -> bool:
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 def main():
     log.info("=" * 60)
-    log.info("MyThing Tech News Scraper — Starting")
+    log.info("MyThing Tech News Scraper — ENHANCED February 2026")
+    log.info("NEW: Premium AI/ML sources (LLMs, Agentic AI, Applied AI)")
+    log.info("NEW: Premium DoD sources (DefenseScoop, C4ISRNET)")
     log.info(f"Target: {INGEST_URL}")
     log.info(f"Token set: {'YES' if SCRAPER_TOKEN else 'NO ← will fail!'}")
     log.info(f"Gemini key set: {'YES' if GEMINI_API_KEY else 'NO ← no AI summaries'}")
+    log.info(f"Max articles per feed: {MAX_ARTICLES_PER_FEED}")
     log.info("=" * 60)
 
     all_articles = []
+    category_counts = {}
 
     for category, feeds in RSS_FEEDS.items():
+        category_articles = []
         for feed_url in feeds:
             articles = fetch_articles(category, feed_url)
+            category_articles.extend(articles)
             all_articles.extend(articles)
-            log.info(f"  ✓ {category} ← {len(articles)} articles")
+            log.info(f"  ✓ {category} ← {len(articles)} articles from {feed_url.split('/')[2]}")
+        
+        category_counts[category] = len(category_articles)
 
-    log.info(f"\nTotal articles scraped: {len(all_articles)}")
+    log.info("\n" + "=" * 60)
+    log.info("SCRAPING SUMMARY")
+    log.info("=" * 60)
+    for cat, count in category_counts.items():
+        log.info(f"  {cat:20s}: {count:3d} articles")
+    log.info(f"\n  {'TOTAL':20s}: {len(all_articles):3d} articles")
+    log.info("=" * 60)
 
     if all_articles:
         success = push_to_site(all_articles)
-        log.info(f"Push {'✅ SUCCEEDED' if success else '❌ FAILED'}")
+        log.info(f"\nPush {'✅ SUCCEEDED' if success else '❌ FAILED'}")
     else:
         log.warning("No articles scraped — check RSS feed URLs")
 

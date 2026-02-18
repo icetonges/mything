@@ -97,30 +97,20 @@ export default async function HomePage() {
               LinkedIn
             </a>
           </div>
-
-          {/* Credentials — centered */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {CREDENTIALS.map(c => (
-              <span key={c.label} title={c.full}
-                className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[hsl(var(--bg-muted))] border border-[hsl(var(--border))] text-[hsl(var(--fg-muted))]">
-                <Award size={11} className="text-[hsl(var(--accent))]" /> {c.label}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
+
+      {/* ── TECH PULSE — AI Summary + Category Tabs ────────── */}
+      {articles.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+          <TechPulsePanel articles={articles} />
+        </section>
+      )}
 
       {/* ── PORTFOLIO DASHBOARD ──────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <PortfolioDashboard stats={stats} articles={articles} />
       </section>
-
-      {/* ── TECH PULSE — AI Summary + Category Tabs ────────── */}
-      {articles.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-          <TechPulsePanel articles={articles} />
-        </section>
-      )}
 
       {/* ── EXPLORE TABS ─────────────────────────────────────── */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[hsl(var(--border))]">
