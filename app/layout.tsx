@@ -3,6 +3,7 @@ import './globals.css';
 import { SITE } from '@/lib/constants';
 import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/lib/auth';
+import { Analytics } from '@vercel/analytics/react'; // Added import
 
 export const metadata: Metadata = {
   title: { default: SITE.name, template: `%s | ${SITE.name}` },
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SessionProvider session={session}>
           {children}
         </SessionProvider>
+        <Analytics /> {/* Added component */}
       </body>
     </html>
   );
