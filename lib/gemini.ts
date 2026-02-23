@@ -1,23 +1,45 @@
 /**
  * lib/gemini.ts
- * Multi-provider AI with fallback: Gemini → Groq (Llama models)
- * Primary: Google Gemini 2.5 Flash models
- * Fallback: Groq Llama 3.3 70B and Llama 3.1 8B
+ * Multi-provider AI with optional Groq fallback
+ * Primary: Google Gemini 2.5 Flash models (always available)
+ * Optional Fallback: Groq Llama models (if GROQ_API_KEY is set)
  */
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
-import Groq from 'groq-sdk';
 
-// Initialize providers
+// Initialize Gemini (required)
 const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
-// Model chain: Gemini first, then Groq Llama models as fallback
-const MODEL_CHAIN = [
-  { provider: 'gemini', model: 'gemini-2.5-flash' },
-  { provider: 'gemini', model: 'gemini-2.5-flash-lite' },
-  { provider: 'groq', model: 'llama-3.3-70b-versatile' },
-  { provider: 'groq', model: 'llama-3.1-8b-instant' },
-] as const;
+// Initialize Groq only if API key is available
+let groq: any = null;
+if (process.env.GROQ_API_KEY) {
+  try {
+    const Groq = require('groq-sdk').default;
+    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    console.log('[AI] Groq fallback enabled');
+  } catch (err) {
+    console.log('[AI] Groq SDK not available, using Gemini only');
+  }
+}
+
+// Build model chain dynamically based on available providers
+const buildModelChain = () => {
+  const chain = [
+    { provider: 'gemini', model: 'gemini-2.5-flash' },
+    { provider: 'gemini', model: 'gemini-2.5-flash-lite' },
+  ];
+  
+  // Add Groq models only if Groq is initialized
+  if (groq) {
+    chain.push(
+      { provider: 'groq', model: 'llama-3.3-70b-versatile' },
+      { provider: 'groq', model: 'llama-3.1-8b-instant' }
+    );
+  }
+  
+  return chain;
+};
+
+const MODEL_CHAIN = buildModelChain();
 
 const GEMINI_SAFETY = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
@@ -35,10 +57,14 @@ async function callGemini(model: string, prompt: string, systemPrompt?: string):
       ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
     },
   });
-  return response.text || ''; // Fixed: handle undefined
+  return response.text || '';
 }
 
 async function callGroq(model: string, prompt: string, systemPrompt?: string): Promise<string> {
+  if (!groq) {
+    throw new Error('Groq not initialized');
+  }
+  
   const messages: any[] = [];
   
   if (systemPrompt) {
