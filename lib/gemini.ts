@@ -35,7 +35,7 @@ async function callGemini(model: string, prompt: string, systemPrompt?: string):
       ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
     },
   });
-  return response.text;
+  return response.text || ''; // Fixed: handle undefined
 }
 
 async function callGroq(model: string, prompt: string, systemPrompt?: string): Promise<string> {
