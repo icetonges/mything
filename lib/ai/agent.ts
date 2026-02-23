@@ -1,15 +1,45 @@
 /**
  * lib/ai/agent.ts
- * Multi-agent system using NEW @google/genai SDK.
- * Old SDK (@google/generative-ai) is EOL and doesn't support gemini-2.5-flash.
+ * Multi-agent system with Gemini + optional Groq fallback
+ * Primary: Google Gemini 2.5 Flash models
+ * Optional Fallback: Groq Llama models (if GROQ_API_KEY is set)
  */
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { TOOL_DECLARATIONS, TOOL_HANDLERS } from "./tools";
 import { PETER_CONTEXT } from "@/lib/gemini";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
-const MODEL_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+// Initialize Groq only if API key is available
+let groq: any = null;
+if (process.env.GROQ_API_KEY) {
+  try {
+    const Groq = require('groq-sdk').default;
+    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    console.log('[Agent] Groq fallback enabled');
+  } catch (err) {
+    console.log('[Agent] Groq SDK not available, using Gemini only');
+  }
+}
+
+// Build model chain with Groq fallback
+const buildModelChain = () => {
+  const chain = [
+    { provider: 'gemini', model: 'gemini-2.5-flash' },
+    { provider: 'gemini', model: 'gemini-2.5-flash-lite' },
+  ];
+  
+  if (groq) {
+    chain.push(
+      { provider: 'groq', model: 'llama-3.3-70b-versatile' },
+      { provider: 'groq', model: 'llama-3.1-8b-instant' }
+    );
+  }
+  
+  return chain;
+};
+
+const MODEL_CHAIN = buildModelChain();
 
 const SAFETY = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
@@ -68,6 +98,47 @@ export function routeToAgent(message: string, page: string): string {
   return "portfolio";
 }
 
+// Helper to run agent with Groq fallback
+async function runAgentWithGroq(
+  config: AgentConfig,
+  userMessage: string,
+  conversationHistory: { role: "user" | "assistant"; content: string }[],
+  modelName: string,
+): Promise<AgentResponse> {
+  if (!groq) throw new Error('Groq not initialized');
+  
+  const steps: AgentStep[] = [];
+  const messages: any[] = [{ role: 'system', content: config.systemPrompt }];
+  
+  // Add conversation history
+  conversationHistory.slice(-6).forEach(m => {
+    messages.push({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content });
+  });
+  
+  // Add current user message
+  messages.push({ role: 'user', content: userMessage });
+  
+  // Groq doesn't support function calling the same way as Gemini
+  // So we'll just get a direct response
+  const response = await groq.chat.completions.create({
+    model: modelName,
+    messages,
+    temperature: 0.7,
+    max_tokens: 2000,
+  });
+  
+  const answer = response.choices[0]?.message?.content || '';
+  steps.push({ type: "answer", content: answer });
+  
+  return {
+    steps,
+    answer,
+    agentId: config.id,
+    agentName: config.name,
+    agentEmoji: config.emoji,
+  };
+}
+
 export async function runAgent(
   agentId: string,
   userMessage: string,
@@ -76,16 +147,21 @@ export async function runAgent(
   const config = AGENTS[agentId] ?? AGENTS.portfolio;
   const steps: AgentStep[] = [];
 
-  for (const modelName of MODEL_CHAIN) {
+  for (const { provider, model: modelName } of MODEL_CHAIN) {
     try {
-      // Build history in new SDK format
+      // Use Groq for Groq models
+      if (provider === 'groq') {
+        console.log(`[Agent] Trying ${provider}/${modelName}`);
+        return await runAgentWithGroq(config, userMessage, conversationHistory, modelName);
+      }
+      
+      // Use Gemini for Gemini models
       const history = conversationHistory.slice(-6).map(m => ({
         role:  m.role === "user" ? "user" as const : "model" as const,
         parts: [{ text: m.content }],
       }));
 
-      // New SDK: ai.chats.create() for multi-turn with tools
-      const chat = ai.chats.create({
+      const chat = gemini.chats.create({
         model: modelName,
         config: {
           safetySettings:    SAFETY,
@@ -95,14 +171,12 @@ export async function runAgent(
         history,
       });
 
-      // First message is just text string
       let response = await chat.sendMessage({ message: userMessage });
 
       for (let i = 0; i < config.maxIterations; i++) {
         const functionCalls = response.functionCalls ?? [];
 
         if (functionCalls.length > 0) {
-          // Execute tools and build functionResponse parts
           const functionResponseParts = await Promise.all(
             functionCalls.map(async (fc) => {
               const toolName = fc.name ?? "unknown_tool";
@@ -136,29 +210,28 @@ export async function runAgent(
             })
           );
 
-          // Send function responses back
           response = await chat.sendMessage({ message: functionResponseParts });
 
         } else {
           const answer = (response.text ?? "").trim();
           steps.push({ type: "answer", content: answer });
+          console.log(`[Agent] Success: ${provider}/${modelName}`);
           return { steps, answer, agentId: config.id, agentName: config.name, agentEmoji: config.emoji };
         }
       }
 
-      // Max iterations — get final answer
-      //const final = await chat.sendMessage("Please provide your final answer now.");
       const final = await chat.sendMessage({ message: "Please provide your final answer now." });
       const finalAnswer = (final.text ?? "").trim();
       steps.push({ type: "answer", content: finalAnswer });
+      console.log(`[Agent] Success: ${provider}/${modelName}`);
       return { steps, answer: finalAnswer, agentId: config.id, agentName: config.name, agentEmoji: config.emoji };
 
     } catch (err) {
-      console.error(`[Agent] ${modelName} failed:`, err instanceof Error ? err.message : String(err));
+      console.error(`[Agent] ${provider}/${modelName} failed:`, err instanceof Error ? err.message : String(err));
       continue;
     }
   }
 
-  const errMsg = "All Gemini models failed. Please try again.";
+  const errMsg = "All AI models failed. Please try again.";
   return { steps: [{ type: "answer", content: errMsg }], answer: errMsg, agentId: config.id, agentName: config.name, agentEmoji: config.emoji };
 }
