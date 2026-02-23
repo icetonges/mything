@@ -1,47 +1,84 @@
 /**
  * lib/gemini.ts
- * Uses the NEW @google/genai SDK (replaces deprecated @google/generative-ai).
- * @google/generative-ai reached end-of-life August 2025 and does NOT support
- * gemini-2.5-flash or any 2.0+ models properly.
+ * Multi-provider AI with fallback: Gemini → Groq (Llama models)
+ * Primary: Google Gemini 2.5 Flash models
+ * Fallback: Groq Llama 3.3 70B and Llama 3.1 8B
  */
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
+import Groq from 'groq-sdk';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+// Initialize providers
+const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
+// Model chain: Gemini first, then Groq Llama models as fallback
 const MODEL_CHAIN = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-];
+  { provider: 'gemini', model: 'gemini-2.5-flash' },
+  { provider: 'gemini', model: 'gemini-2.5-flash-lite' },
+  { provider: 'groq', model: 'llama-3.3-70b-versatile' },
+  { provider: 'groq', model: 'llama-3.1-8b-instant' },
+] as const;
 
-const SAFETY = [
+const GEMINI_SAFETY = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
 ];
 
+async function callGemini(model: string, prompt: string, systemPrompt?: string): Promise<string> {
+  const response = await gemini.models.generateContent({
+    model,
+    contents: prompt,
+    config: {
+      safetySettings: GEMINI_SAFETY,
+      ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
+    },
+  });
+  return response.text;
+}
+
+async function callGroq(model: string, prompt: string, systemPrompt?: string): Promise<string> {
+  const messages: any[] = [];
+  
+  if (systemPrompt) {
+    messages.push({ role: 'system', content: systemPrompt });
+  }
+  
+  messages.push({ role: 'user', content: prompt });
+  
+  const response = await groq.chat.completions.create({
+    model,
+    messages,
+    temperature: 0.7,
+    max_tokens: 2000,
+  });
+  
+  return response.choices[0]?.message?.content || '';
+}
+
 export async function generateWithFallback(prompt: string, systemPrompt?: string): Promise<string> {
-  for (const modelName of MODEL_CHAIN) {
+  for (const { provider, model } of MODEL_CHAIN) {
     try {
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
-          safetySettings: SAFETY,
-          ...(systemPrompt ? { systemInstruction: systemPrompt } : {}),
-        },
-      });
-      const text = response.text;
+      let text: string;
+      
+      if (provider === 'gemini') {
+        text = await callGemini(model, prompt, systemPrompt);
+      } else {
+        text = await callGroq(model, prompt, systemPrompt);
+      }
+      
       if (text) {
-        console.log(`[Gemini] Success: ${modelName}`);
+        console.log(`[AI] Success: ${provider}/${model}`);
         return text;
       }
     } catch (err) {
-      console.error(`[Gemini] ${modelName} failed:`, err instanceof Error ? err.message : String(err));
+      console.error(`[AI] ${provider}/${model} failed:`, err instanceof Error ? err.message : String(err));
       continue;
     }
   }
-  console.error('[Gemini] All models failed');
+  
+  console.error('[AI] All models failed');
   return 'AI processing temporarily unavailable. Please try again.';
 }
 
@@ -104,7 +141,7 @@ About Peter Shang:
 
 Technical Skills:
 - Full-stack: Next.js 15, React 19, TypeScript, Python, PostgreSQL
-- AI/ML: Gemini API, scikit-learn, pandas, XGBoost, transformer models
+- AI/ML: Gemini API, Groq, scikit-learn, pandas, XGBoost, transformer models
 - Federal finance: OMB A-11, A-123, A-136, CFO Act, GPRA, FASAB, FIAR
 
 Recent Projects:
